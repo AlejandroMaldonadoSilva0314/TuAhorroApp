@@ -6,4 +6,7 @@ abstract class GastoRepository {
   Future<List<Gasto>> obtenerGastos();
   Future<void> agregarGasto(Gasto gasto);
   Future<void> eliminarGasto(String id);
+
+  Future<double> obtenerPresupuestoSemanal();
+  Future<void> guardarPresupuestoSemanal(double monto);
 }

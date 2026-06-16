@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/formatos.dart';
 import '../data/gasto_repository.dart';
+import '../logic/plata_para_hoy.dart';
+import '../logic/presupuesto_semanal.dart';
 import '../models/gasto.dart';
 import '../widgets/dashboard_resumen.dart';
 import '../widgets/gasto_card.dart';
@@ -18,6 +20,7 @@ class ListaGastosScreen extends StatefulWidget {
 
 class _ListaGastosScreenState extends State<ListaGastosScreen> {
   List<Gasto> _gastos = [];
+  double _presupuesto = 0;
   bool _cargando = true;
   String? _error;
 
@@ -33,10 +36,14 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       _error = null;
     });
     try {
-      final gastos = await widget.repository.obtenerGastos();
+      final resultados = await Future.wait([
+        widget.repository.obtenerGastos(),
+        widget.repository.obtenerPresupuestoSemanal(),
+      ]);
       if (mounted) {
         setState(() {
-          _gastos = gastos;
+          _gastos = resultados[0] as List<Gasto>;
+          _presupuesto = resultados[1] as double;
           _cargando = false;
         });
       }
@@ -64,6 +71,22 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       .fold(0, (sum, g) => sum + g.monto);
 
   double get _saldo => _totalIngresos - _totalGastos;
+
+  double get _gastadoSemana =>
+      PresupuestoSemanal().gastadoEstaSemana(_gastos);
+
+  double get _disponibleSemana =>
+      _presupuesto > 0 ? PresupuestoSemanal().disponible(presupuesto: _presupuesto, gastos: _gastos) : 0;
+
+  double get _plataParaHoy => PlataParaHoy().calcular(
+        saldo: _saldo,
+        disponibleSemanal: _presupuesto > 0 ? _disponibleSemana : null,
+      );
+
+  Future<void> _actualizarPresupuesto(double monto) async {
+    await widget.repository.guardarPresupuestoSemanal(monto);
+    setState(() => _presupuesto = monto);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +174,11 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
               ingresos: _totalIngresos,
               gastos: _totalGastos,
               saldo: _saldo,
+              plataParaHoy: _plataParaHoy,
+              presupuestoSemanal: _presupuesto,
+              gastadoSemana: _gastadoSemana,
+              disponibleSemana: _disponibleSemana,
+              onEditarPresupuesto: _actualizarPresupuesto,
             );
           }
           final gasto = _gastos[index - 1];

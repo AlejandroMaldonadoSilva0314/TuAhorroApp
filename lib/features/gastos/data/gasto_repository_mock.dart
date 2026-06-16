@@ -69,4 +69,14 @@ class GastoRepositoryMock implements GastoRepository {
     await Future.delayed(_latencia);
     _db.removeWhere((map) => map['id'] == id);
   }
+
+  double _presupuesto = 0;
+
+  @override
+  Future<double> obtenerPresupuestoSemanal() async => _presupuesto;
+
+  @override
+  Future<void> guardarPresupuestoSemanal(double monto) async {
+    _presupuesto = monto;
+  }
 }

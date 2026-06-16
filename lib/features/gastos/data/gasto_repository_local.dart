@@ -12,6 +12,7 @@ import 'gasto_repository.dart';
 /// sin tocar la UI ni el contrato [GastoRepository].
 class GastoRepositoryLocal implements GastoRepository {
   static const _clave = 'gastos';
+  static const _clavePresupuesto = 'presupuesto_semanal';
 
   @override
   Future<List<Gasto>> obtenerGastos() async {
@@ -40,6 +41,18 @@ class GastoRepositoryLocal implements GastoRepository {
     final gastos = await obtenerGastos();
     gastos.removeWhere((g) => g.id == id);
     await _guardarTodos(gastos);
+  }
+
+  @override
+  Future<double> obtenerPresupuestoSemanal() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(_clavePresupuesto) ?? 0;
+  }
+
+  @override
+  Future<void> guardarPresupuestoSemanal(double monto) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_clavePresupuesto, monto);
   }
 
   Future<void> _guardarTodos(List<Gasto> gastos) async {
