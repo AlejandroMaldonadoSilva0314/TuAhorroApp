@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/theme_scope.dart';
+import '../models/bolsillo.dart';
+import '../models/categoria.dart';
 import '../models/gasto.dart';
 
 class RegistroScreen extends StatefulWidget {
-  const RegistroScreen({super.key, required this.onGuardar});
+  const RegistroScreen({
+    super.key,
+    required this.onGuardar,
+    this.bolsillos = const [],
+    this.categorias = const [],
+  });
 
-  /// Callback async: permite que el caller persista la transacción antes de pop.
   final Future<void> Function(Gasto) onGuardar;
+  final List<Bolsillo> bolsillos;
+  final List<Categoria> categorias;
 
   @override
   State<RegistroScreen> createState() => _RegistroScreenState();
@@ -19,15 +26,35 @@ class _RegistroScreenState extends State<RegistroScreen> {
   final _tituloController = TextEditingController();
   final _montoController = TextEditingController();
 
-  CategoriaGasto _categoria = CategoriaGasto.otros;
+  late String _categoriaId;
   TipoTransaccion _tipo = TipoTransaccion.gasto;
+  String? _bolsilloId;
   bool _guardando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriaId = widget.categorias.isNotEmpty
+        ? widget.categorias.firstWhere((c) => c.id == 'otros',
+            orElse: () => widget.categorias.first).id
+        : 'otros';
+  }
 
   @override
   void dispose() {
     _tituloController.dispose();
     _montoController.dispose();
     super.dispose();
+  }
+
+  List<Categoria> get _categoriasFiltradas {
+    return widget.categorias.where((c) {
+      if (_tipo == TipoTransaccion.gasto) {
+        return c.tipo == TipoCategoria.gasto || c.tipo == TipoCategoria.ambos;
+      } else {
+        return c.tipo == TipoCategoria.ingreso || c.tipo == TipoCategoria.ambos;
+      }
+    }).toList();
   }
 
   Future<void> _guardar() async {
@@ -39,9 +66,10 @@ class _RegistroScreenState extends State<RegistroScreen> {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       titulo: _tituloController.text.trim(),
       monto: double.parse(_montoController.text.replaceAll(',', '.')),
-      categoria: _categoria,
+      categoriaId: _categoriaId,
       tipo: _tipo,
       fecha: DateTime.now(),
+      bolsilloId: _bolsilloId,
     );
 
     await widget.onGuardar(transaccion);
@@ -51,17 +79,17 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = ThemeScope.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final filtradas = _categoriasFiltradas;
+    if (!filtradas.any((c) => c.id == _categoriaId) && filtradas.isNotEmpty) {
+      _categoriaId = filtradas.first.id;
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nueva transacción'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(gradient: appTheme.gradient),
-        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
       body: Form(
         key: _formKey,
@@ -109,20 +137,47 @@ class _RegistroScreenState extends State<RegistroScreen> {
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<CategoriaGasto>(
-              value: _categoria,
+            DropdownButtonFormField<String>(
+              value: _categoriaId,
               decoration: const InputDecoration(
                 labelText: 'Categoría',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.category_outlined),
               ),
-              items: CategoriaGasto.values
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c.nombre)))
+              items: filtradas
+                  .map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Row(
+                          children: [
+                            Icon(c.icono, size: 20),
+                            const SizedBox(width: 8),
+                            Text(c.nombre),
+                          ],
+                        ),
+                      ))
                   .toList(),
               onChanged: (v) {
-                if (v != null) setState(() => _categoria = v);
+                if (v != null) setState(() => _categoriaId = v);
               },
             ),
+            if (widget.bolsillos.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String?>(
+                value: _bolsilloId,
+                decoration: const InputDecoration(
+                  labelText: 'Bolsillo (opcional)',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.wallet_rounded),
+                ),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('Sin bolsillo')),
+                  ...widget.bolsillos.map(
+                    (b) => DropdownMenuItem(value: b.id, child: Text(b.nombre)),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _bolsilloId = v),
+              ),
+            ],
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: _guardando ? null : _guardar,

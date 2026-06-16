@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/formatos.dart';
+import '../models/categoria.dart';
 import '../models/gasto.dart';
 
 class GastoCard extends StatelessWidget {
   const GastoCard({
     super.key,
     required this.gasto,
+    required this.categorias,
     this.onEliminar,
   });
 
   final Gasto gasto;
+  final List<Categoria> categorias;
   final VoidCallback? onEliminar;
+
+  Categoria? get _categoria =>
+      categorias.where((c) => c.id == gasto.categoriaId).firstOrNull;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final cat = _categoria;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -30,7 +37,7 @@ class GastoCard extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: colorScheme.primaryContainer,
           child: Icon(
-            _iconoPorCategoria(gasto.categoria),
+            cat?.icono ?? Icons.category_outlined,
             color: colorScheme.onPrimaryContainer,
             size: 20,
           ),
@@ -40,7 +47,7 @@ class GastoCard extends StatelessWidget {
           style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          '${gasto.categoria.nombre} · ${Formatos.fecha(gasto.fecha)}',
+          '${cat?.nombre ?? gasto.categoriaId} · ${Formatos.fecha(gasto.fecha)}',
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -66,17 +73,5 @@ class GastoCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _iconoPorCategoria(CategoriaGasto categoria) {
-    return switch (categoria) {
-      CategoriaGasto.comida => Icons.restaurant_outlined,
-      CategoriaGasto.transporte => Icons.directions_bus_outlined,
-      CategoriaGasto.servicios => Icons.receipt_long_outlined,
-      CategoriaGasto.entretenimiento => Icons.movie_outlined,
-      CategoriaGasto.salud => Icons.local_hospital_outlined,
-      CategoriaGasto.educacion => Icons.school_outlined,
-      CategoriaGasto.otros => Icons.category_outlined,
-    };
   }
 }

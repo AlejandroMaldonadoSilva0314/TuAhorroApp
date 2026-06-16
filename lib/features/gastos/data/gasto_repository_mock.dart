@@ -1,4 +1,8 @@
+import '../models/bolsillo.dart';
+import '../models/categoria.dart';
+import '../models/fiado.dart';
 import '../models/gasto.dart';
+import '../models/meta_ahorro.dart';
 import 'gasto_repository.dart';
 
 class GastoRepositoryMock implements GastoRepository {
@@ -79,4 +83,79 @@ class GastoRepositoryMock implements GastoRepository {
   Future<void> guardarPresupuestoSemanal(double monto) async {
     _presupuesto = monto;
   }
+
+  final List<Bolsillo> _bolsillos = [];
+
+  @override
+  Future<List<Bolsillo>> obtenerBolsillos() async => List.of(_bolsillos);
+
+  @override
+  Future<void> agregarBolsillo(Bolsillo bolsillo) async =>
+      _bolsillos.add(bolsillo);
+
+  @override
+  Future<void> actualizarBolsillo(Bolsillo bolsillo) async {
+    final i = _bolsillos.indexWhere((b) => b.id == bolsillo.id);
+    if (i != -1) _bolsillos[i] = bolsillo;
+  }
+
+  @override
+  Future<void> eliminarBolsillo(String id) async =>
+      _bolsillos.removeWhere((b) => b.id == id);
+
+  final List<Fiado> _fiados = [];
+
+  @override
+  Future<List<Fiado>> obtenerFiados() async => List.of(_fiados);
+
+  @override
+  Future<void> agregarFiado(Fiado fiado) async => _fiados.add(fiado);
+
+  @override
+  Future<void> actualizarFiado(Fiado fiado) async {
+    final i = _fiados.indexWhere((f) => f.id == fiado.id);
+    if (i != -1) _fiados[i] = fiado;
+  }
+
+  @override
+  Future<void> eliminarFiado(String id) async =>
+      _fiados.removeWhere((f) => f.id == id);
+
+  final List<MetaAhorro> _metas = [];
+
+  @override
+  Future<List<MetaAhorro>> obtenerMetas() async => List.of(_metas);
+
+  @override
+  Future<void> agregarMeta(MetaAhorro meta) async => _metas.add(meta);
+
+  @override
+  Future<void> actualizarMeta(MetaAhorro meta) async {
+    final i = _metas.indexWhere((m) => m.id == meta.id);
+    if (i != -1) _metas[i] = meta;
+  }
+
+  @override
+  Future<void> eliminarMeta(String id) async =>
+      _metas.removeWhere((m) => m.id == id);
+
+  final List<Categoria> _customCategorias = [];
+
+  @override
+  Future<List<Categoria>> obtenerCategorias() async =>
+      [...Categoria.predeterminadas, ..._customCategorias];
+
+  @override
+  Future<void> agregarCategoria(Categoria categoria) async =>
+      _customCategorias.add(categoria);
+
+  @override
+  Future<void> actualizarCategoria(Categoria categoria) async {
+    final i = _customCategorias.indexWhere((c) => c.id == categoria.id);
+    if (i != -1) _customCategorias[i] = categoria;
+  }
+
+  @override
+  Future<void> eliminarCategoria(String id) async =>
+      _customCategorias.removeWhere((c) => c.id == id);
 }

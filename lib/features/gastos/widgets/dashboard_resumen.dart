@@ -14,6 +14,8 @@ class DashboardResumen extends StatelessWidget {
     required this.gastadoSemana,
     required this.disponibleSemana,
     required this.onEditarPresupuesto,
+    this.insightMensajes = const [],
+    this.onTapInsights,
   });
 
   final double ingresos;
@@ -24,6 +26,8 @@ class DashboardResumen extends StatelessWidget {
   final double gastadoSemana;
   final double disponibleSemana;
   final ValueChanged<double> onEditarPresupuesto;
+  final List<String> insightMensajes;
+  final VoidCallback? onTapInsights;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +51,13 @@ class DashboardResumen extends StatelessWidget {
             onEditar: onEditarPresupuesto,
           ),
           const SizedBox(height: 12),
+          // --- Insights ---
+          if (insightMensajes.isNotEmpty)
+            _TarjetaInsights(
+              mensajes: insightMensajes,
+              onTap: onTapInsights,
+            ),
+          if (insightMensajes.isNotEmpty) const SizedBox(height: 12),
           // --- Ingresos / Gastos ---
           Row(
             children: [
@@ -366,6 +377,61 @@ class _MiniIndicador extends StatelessWidget {
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color),
         ),
       ],
+    );
+  }
+}
+
+class _TarjetaInsights extends StatelessWidget {
+  const _TarjetaInsights({required this.mensajes, this.onTap});
+
+  final List<String> mensajes;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cs.primaryContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.lightbulb_outline, size: 18, color: cs.onPrimaryContainer),
+                const SizedBox(width: 6),
+                Text(
+                  'Insights',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onPrimaryContainer,
+                  ),
+                ),
+                const Spacer(),
+                if (onTap != null)
+                  Icon(Icons.chevron_right, size: 18, color: cs.onPrimaryContainer),
+              ],
+            ),
+            const SizedBox(height: 10),
+            for (final msg in mensajes)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  msg,
+                  style: TextStyle(fontSize: 13, color: cs.onPrimaryContainer),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
