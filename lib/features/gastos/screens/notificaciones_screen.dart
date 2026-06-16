@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../logic/notificacion_service.dart';
 import '../models/notificacion_config.dart';
 
@@ -47,17 +48,18 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-        title: const Text('Notificaciones'),
-      ),
+      appBar: AppBar(title: const Text('Notificaciones')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Card(
+                Container(
+                  decoration: BoxDecoration(
+                    color: cs.cardSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: cs.cardBorder),
+                  ),
                   child: SwitchListTile(
                     title: const Text('Recordatorio diario'),
                     subtitle: const Text('Recibe un aviso para registrar tus gastos'),
@@ -66,46 +68,72 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Card(
+                Container(
+                  decoration: BoxDecoration(
+                    color: cs.cardSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: cs.cardBorder),
+                  ),
                   child: ListTile(
                     enabled: _config.activado,
-                    leading: const Icon(Icons.access_time_rounded),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.access_time_rounded, color: cs.primary, size: 20),
+                    ),
                     title: const Text('Hora del recordatorio'),
                     subtitle: Text(
                       TimeOfDay(hour: _config.hora, minute: _config.minuto)
                           .format(context),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 20,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
                     onTap: _config.activado ? _seleccionarHora : null,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    'Mensajes de ejemplo:',
+                    'MENSAJES DE EJEMPLO',
                     style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: cs.primary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 for (final msg in const [
                   '¿Registraste tus gastos de hoy?',
                   'Actualiza tu Plata para Hoy.',
                 ])
-                  Card(
-                    color: cs.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: cs.subtleSurface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
+                      ),
                       child: Row(
                         children: [
-                          Icon(Icons.notifications_outlined, size: 20, color: cs.onPrimaryContainer),
-                          const SizedBox(width: 10),
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: cs.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(Icons.notifications_outlined, size: 16, color: cs.primary),
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
-                            child: Text(msg, style: TextStyle(color: cs.onPrimaryContainer)),
+                            child: Text(msg, style: TextStyle(color: cs.onSurface, fontSize: 14)),
                           ),
                         ],
                       ),

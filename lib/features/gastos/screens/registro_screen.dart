@@ -79,34 +79,29 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final filtradas = _categoriasFiltradas;
     if (!filtradas.any((c) => c.id == _categoriaId) && filtradas.isNotEmpty) {
       _categoriaId = filtradas.first.id;
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nueva transacción'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
+      appBar: AppBar(title: const Text('Nueva transacción')),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           children: [
             _SelectorTipo(
               seleccionado: _tipo,
               onChanged: (t) => setState(() => _tipo = t),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             TextFormField(
               controller: _tituloController,
               decoration: const InputDecoration(
                 labelText: 'Título *',
                 hintText: 'Ej: Almuerzo, Arriendo, Salario...',
-                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.edit_outlined),
               ),
               textCapitalization: TextCapitalization.sentences,
@@ -119,7 +114,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
               decoration: const InputDecoration(
                 labelText: 'Monto (COP) *',
                 hintText: 'Ej: 15000',
-                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.attach_money),
                 prefixText: '\$ ',
               ),
@@ -138,10 +132,9 @@ class _RegistroScreenState extends State<RegistroScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _categoriaId,
+              initialValue: _categoriaId,
               decoration: const InputDecoration(
                 labelText: 'Categoría',
-                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.category_outlined),
               ),
               items: filtradas
@@ -163,10 +156,9 @@ class _RegistroScreenState extends State<RegistroScreen> {
             if (widget.bolsillos.isNotEmpty) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String?>(
-                value: _bolsilloId,
+                initialValue: _bolsilloId,
                 decoration: const InputDecoration(
                   labelText: 'Bolsillo (opcional)',
-                  border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.wallet_rounded),
                 ),
                 items: [
@@ -182,15 +174,18 @@ class _RegistroScreenState extends State<RegistroScreen> {
             FilledButton.icon(
               onPressed: _guardando ? null : _guardar,
               icon: _guardando
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: cs.onPrimary,
+                      ),
                     )
                   : const Icon(Icons.save_outlined),
               label: Text(_guardando ? 'Guardando...' : 'Guardar transacción'),
               style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
+                minimumSize: const Size.fromHeight(52),
               ),
             ),
           ],
@@ -213,12 +208,12 @@ class _SelectorTipo extends StatelessWidget {
         ButtonSegment(
           value: TipoTransaccion.gasto,
           label: Text('Gasto'),
-          icon: Icon(Icons.arrow_downward),
+          icon: Icon(Icons.arrow_downward_rounded),
         ),
         ButtonSegment(
           value: TipoTransaccion.ingreso,
           label: Text('Ingreso'),
-          icon: Icon(Icons.arrow_upward),
+          icon: Icon(Icons.arrow_upward_rounded),
         ),
       ],
       selected: {seleccionado},

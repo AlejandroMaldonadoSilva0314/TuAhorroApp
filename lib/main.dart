@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/theme/app_theme.dart';
 import 'features/gastos/data/gasto_repository_local.dart';
 import 'features/gastos/logic/notificacion_service.dart';
 import 'features/gastos/logic/settings_service.dart';
@@ -45,14 +46,7 @@ class _TuAhorroAppState extends State<TuAhorroApp> {
   }
 
   ThemeData _buildTheme(Brightness brightness) {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1B5E20),
-        brightness: brightness,
-      ),
-      useMaterial3: true,
-      fontFamily: 'Roboto',
-    );
+    return brightness == Brightness.dark ? AppTheme.dark() : AppTheme.light();
   }
 
   @override

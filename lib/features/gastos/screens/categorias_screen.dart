@@ -81,11 +81,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
+      appBar: AppBar(title: const Text('Categorías')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -95,9 +91,14 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                 final cat = _categorias[index];
                 final enUso = _categoriaEnUso(cat.id);
                 return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: colorScheme.primaryContainer,
-                    child: Icon(cat.icono, color: colorScheme.onPrimaryContainer, size: 20),
+                  leading: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(cat.icono, color: colorScheme.primary, size: 20),
                   ),
                   title: Text(cat.nombre),
                   subtitle: Text(_tipoLabel(cat.tipo) +
@@ -128,9 +129,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _abrirFormulario(),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -196,8 +195,6 @@ class _CategoriaFormScreenState extends State<_CategoriaFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(esEdicion ? 'Editar categoría' : 'Nueva categoría'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
       ),
       body: Form(
         key: _formKey,

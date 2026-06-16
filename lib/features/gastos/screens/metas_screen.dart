@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/gasto_repository.dart';
 import '../models/meta_ahorro.dart';
@@ -180,11 +181,7 @@ class _MetasScreenState extends State<MetasScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Metas de Ahorro'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
+      appBar: AppBar(title: const Text('Metas de Ahorro')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _metas.isEmpty
@@ -192,11 +189,21 @@ class _MetasScreenState extends State<MetasScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.flag_rounded, size: 64, color: colorScheme.outlineVariant),
-                      const SizedBox(height: 12),
-                      const Text('No tienes metas de ahorro'),
-                      const SizedBox(height: 8),
-                      const Text('Crea una para empezar a ahorrar', style: TextStyle(fontSize: 13)),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.flag_rounded, size: 48,
+                            color: colorScheme.primary.withValues(alpha: 0.5)),
+                      ),
+                      const SizedBox(height: 20),
+                      Text('No tienes metas de ahorro',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 6),
+                      Text('Crea una para empezar a ahorrar',
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 )
@@ -223,12 +230,9 @@ class _MetasScreenState extends State<MetasScreen> {
                     ],
                   ],
                 ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _crearOEditar(),
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva meta'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -242,13 +246,14 @@ class _SeccionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Text(
         titulo,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
+          letterSpacing: 0.3,
         ),
       ),
     );
@@ -274,98 +279,127 @@ class _MetaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final porcentaje = (meta.progreso * 100).toInt();
+    final progressColor = meta.completada ? colorScheme.positivo : colorScheme.primary;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: meta.completada
-                      ? Colors.green.shade50
-                      : colorScheme.primaryContainer,
-                  child: Icon(
-                    meta.completada ? Icons.check_rounded : Icons.flag_rounded,
-                    color: meta.completada ? Colors.green.shade700 : colorScheme.primary,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.cardSurface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colorScheme.cardBorder),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: meta.completada
+                          ? colorScheme.positivoContainer
+                          : colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      meta.completada ? Icons.check_rounded : Icons.flag_rounded,
+                      color: meta.completada ? colorScheme.positivo : colorScheme.primary,
+                      size: 22,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        meta.nombre,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          decoration: meta.completada ? TextDecoration.lineThrough : null,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          meta.nombre,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            decoration: meta.completada ? TextDecoration.lineThrough : null,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${Formatos.moneda(meta.montoActual)} de ${Formatos.moneda(meta.montoObjetivo)}',
-                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-                      ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${Formatos.moneda(meta.montoActual)} de ${Formatos.moneda(meta.montoObjetivo)}',
+                          style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (v) {
+                      if (v == 'abonar') onAbonar?.call();
+                      if (v == 'editar') onEditar();
+                      if (v == 'completar') onCompletar?.call();
+                      if (v == 'eliminar') onEliminar();
+                    },
+                    itemBuilder: (_) => [
+                      if (!meta.completada && onAbonar != null)
+                        const PopupMenuItem(value: 'abonar', child: Text('Abonar')),
+                      const PopupMenuItem(value: 'editar', child: Text('Editar')),
+                      if (!meta.completada && onCompletar != null)
+                        const PopupMenuItem(value: 'completar', child: Text('Completar')),
+                      const PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
                     ],
                   ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (v) {
-                    if (v == 'abonar') onAbonar?.call();
-                    if (v == 'editar') onEditar();
-                    if (v == 'completar') onCompletar?.call();
-                    if (v == 'eliminar') onEliminar();
-                  },
-                  itemBuilder: (_) => [
-                    if (!meta.completada && onAbonar != null)
-                      const PopupMenuItem(value: 'abonar', child: Text('Abonar')),
-                    const PopupMenuItem(value: 'editar', child: Text('Editar')),
-                    if (!meta.completada && onCompletar != null)
-                      const PopupMenuItem(value: 'completar', child: Text('Completar')),
-                    const PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: meta.progreso,
-                minHeight: 8,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                color: meta.completada ? Colors.green.shade700 : colorScheme.primary,
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$porcentaje%',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: meta.completada ? Colors.green.shade700 : colorScheme.primary,
-                  ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: meta.progreso,
+                  minHeight: 8,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  color: progressColor,
                 ),
-                if (!meta.completada)
-                  Text(
-                    'Faltan ${Formatos.moneda(meta.faltante)}',
-                    style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: progressColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '$porcentaje%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: progressColor,
+                      ),
+                    ),
                   ),
-                if (meta.completada)
-                  Text(
-                    'Meta alcanzada',
-                    style: TextStyle(fontSize: 12, color: Colors.green.shade700, fontWeight: FontWeight.w500),
-                  ),
-              ],
-            ),
-          ],
+                  if (!meta.completada)
+                    Text(
+                      'Faltan ${Formatos.moneda(meta.faltante)}',
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                    ),
+                  if (meta.completada)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_rounded, size: 14, color: colorScheme.positivo),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Meta alcanzada',
+                          style: TextStyle(fontSize: 12, color: colorScheme.positivo, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

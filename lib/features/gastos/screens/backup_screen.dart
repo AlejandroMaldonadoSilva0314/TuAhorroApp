@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../data/gasto_repository.dart';
 import '../logic/backup_service.dart';
 
@@ -84,69 +85,91 @@ class _BackupScreenState extends State<BackupScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-        title: const Text('Respaldo'),
-      ),
+      appBar: AppBar(title: const Text('Respaldo')),
       body: _procesando
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Icon(Icons.cloud_upload_outlined, size: 48, color: cs.primary),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Exportar datos',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: cs.cardSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: cs.cardBorder),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cs.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Genera un archivo JSON con todas tus transacciones, bolsillos, fiados, metas y presupuesto.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: cs.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
+                        child: Icon(Icons.cloud_upload_outlined, size: 36, color: cs.primary),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Exportar datos',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Genera un archivo JSON con todas tus transacciones, bolsillos, fiados, metas y presupuesto.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: cs.onSurfaceVariant, height: 1.4),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
                           onPressed: _exportar,
-                          icon: const Icon(Icons.share),
+                          icon: const Icon(Icons.share_rounded),
                           label: const Text('Exportar y compartir'),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Icon(Icons.cloud_download_outlined, size: 48, color: cs.primary),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Importar datos',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: cs.cardSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: cs.cardBorder),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cs.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Selecciona un archivo de respaldo para restaurar tu información.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: cs.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: 16),
-                        OutlinedButton.icon(
+                        child: Icon(Icons.cloud_download_outlined, size: 36, color: cs.primary),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Importar datos',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Selecciona un archivo de respaldo para restaurar tu información.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: cs.onSurfaceVariant, height: 1.4),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
                           onPressed: _importar,
-                          icon: const Icon(Icons.file_open),
+                          icon: const Icon(Icons.file_open_rounded),
                           label: const Text('Seleccionar archivo'),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],

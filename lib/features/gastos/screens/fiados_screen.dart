@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/gasto_repository.dart';
 import '../models/fiado.dart';
@@ -172,11 +173,7 @@ class _FiadosScreenState extends State<FiadosScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fiados y Préstamos'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
+      appBar: AppBar(title: const Text('Fiados y Préstamos')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _fiados.isEmpty
@@ -184,11 +181,21 @@ class _FiadosScreenState extends State<FiadosScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.handshake_outlined, size: 64, color: colorScheme.outlineVariant),
-                      const SizedBox(height: 12),
-                      const Text('No hay fiados registrados'),
-                      const SizedBox(height: 8),
-                      const Text('Registra quién te debe o a quién debes', style: TextStyle(fontSize: 13)),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.handshake_outlined, size: 48,
+                            color: colorScheme.primary.withValues(alpha: 0.5)),
+                      ),
+                      const SizedBox(height: 20),
+                      Text('No hay fiados registrados',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 6),
+                      Text('Registra quién te debe o a quién debes',
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 )
@@ -219,18 +226,13 @@ class _FiadosScreenState extends State<FiadosScreen> {
                     ],
                   ],
                 ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarFormulario(),
-        icon: const Icon(Icons.add),
-        label: const Text('Nuevo fiado'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
 
 class _ResumenFiados extends StatelessWidget {
   const _ResumenFiados({
@@ -254,26 +256,29 @@ class _ResumenFiados extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(16),
+              gradient: colorScheme.accentGradient,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               children: [
-                Text('Balance neto', style: TextStyle(fontSize: 13, color: colorScheme.onPrimaryContainer)),
-                const SizedBox(height: 4),
+                Text('Balance neto',
+                    style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.8))),
+                const SizedBox(height: 6),
                 Text(
                   Formatos.moneda(balance.abs()),
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: balancePositivo ? Colors.green.shade700 : colorScheme.error,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   balancePositivo ? 'Te deben más de lo que debes' : 'Debes más de lo que te deben',
-                  style: TextStyle(fontSize: 11, color: colorScheme.onPrimaryContainer),
+                  style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
                 ),
               ],
             ),
@@ -285,8 +290,8 @@ class _ResumenFiados extends StatelessWidget {
                 child: _MiniResumen(
                   label: 'Me deben',
                   monto: porCobrar,
-                  color: Colors.green.shade700,
-                  fondo: Colors.green.shade50,
+                  color: colorScheme.positivo,
+                  fondo: colorScheme.positivoContainer,
                   icono: Icons.arrow_downward_rounded,
                 ),
               ),
@@ -325,27 +330,35 @@ class _MiniResumen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       decoration: BoxDecoration(
-        color: fondo,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: cs.cardSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icono, size: 14, color: color),
-              const SizedBox(width: 4),
-              Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600)),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: fondo,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(icono, size: 14, color: color),
+              ),
+              const SizedBox(width: 6),
+              Text(label, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant, fontWeight: FontWeight.w500)),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             Formatos.moneda(monto),
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color),
           ),
         ],
       ),
@@ -361,13 +374,14 @@ class _SeccionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Text(
         titulo,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
+          letterSpacing: 0.3,
         ),
       ),
     );
@@ -391,53 +405,70 @@ class _FiadoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final esCobrar = fiado.tipo == TipoFiado.porCobrar;
-    final color = esCobrar ? Colors.green.shade700 : colorScheme.error;
+    final color = esCobrar ? colorScheme.positivo : colorScheme.error;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: esCobrar ? Colors.green.shade50 : colorScheme.errorContainer,
-          child: Icon(
-            esCobrar ? Icons.call_received_rounded : Icons.call_made_rounded,
-            color: color,
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorScheme.cardBorder),
         ),
-        title: Text(
-          fiado.nombre,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            decoration: fiado.pagado ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${esCobrar ? "Me debe" : "Le debo"} ${Formatos.moneda(fiado.monto)}',
-              style: TextStyle(color: color, fontWeight: FontWeight.w500),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: esCobrar
+                  ? colorScheme.positivoContainer
+                  : colorScheme.errorContainer.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
             ),
-            if (fiado.nota != null)
-              Text(fiado.nota!, style: const TextStyle(fontSize: 12)),
-            Text(
-              Formatos.fecha(fiado.fecha),
-              style: TextStyle(fontSize: 11, color: colorScheme.outlineVariant),
+            child: Icon(
+              esCobrar ? Icons.call_received_rounded : Icons.call_made_rounded,
+              color: color,
+              size: 22,
             ),
-          ],
-        ),
-        isThreeLine: true,
-        trailing: PopupMenuButton<String>(
-          onSelected: (v) {
-            if (v == 'pagado') onMarcarPagado?.call();
-            if (v == 'editar') onEditar();
-            if (v == 'eliminar') onEliminar();
-          },
-          itemBuilder: (_) => [
-            if (!fiado.pagado)
-              const PopupMenuItem(value: 'pagado', child: Text('Marcar pagado')),
-            const PopupMenuItem(value: 'editar', child: Text('Editar')),
-            const PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
-          ],
+          ),
+          title: Text(
+            fiado.nombre,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              decoration: fiado.pagado ? TextDecoration.lineThrough : null,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 2),
+              Text(
+                '${esCobrar ? "Me debe" : "Le debo"} ${Formatos.moneda(fiado.monto)}',
+                style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              if (fiado.nota != null)
+                Text(fiado.nota!, style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
+              Text(
+                Formatos.fecha(fiado.fecha),
+                style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+              ),
+            ],
+          ),
+          isThreeLine: true,
+          trailing: PopupMenuButton<String>(
+            onSelected: (v) {
+              if (v == 'pagado') onMarcarPagado?.call();
+              if (v == 'editar') onEditar();
+              if (v == 'eliminar') onEliminar();
+            },
+            itemBuilder: (_) => [
+              if (!fiado.pagado)
+                const PopupMenuItem(value: 'pagado', child: Text('Marcar pagado')),
+              const PopupMenuItem(value: 'editar', child: Text('Editar')),
+              const PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
+            ],
+          ),
         ),
       ),
     );

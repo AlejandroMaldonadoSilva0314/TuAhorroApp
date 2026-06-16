@@ -6,6 +6,7 @@ import '../logic/notificacion_service.dart';
 import '../logic/settings_service.dart';
 import '../models/app_settings.dart';
 import '../models/notificacion_config.dart';
+import 'acerca_de_screen.dart';
 
 class AjustesScreen extends StatefulWidget {
   const AjustesScreen({
@@ -74,11 +75,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-        title: const Text('Ajustes'),
-      ),
+      appBar: AppBar(title: const Text('Ajustes')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -114,26 +111,25 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _seccion(String titulo) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
       child: Text(
-        titulo,
+        titulo.toUpperCase(),
         style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.0,
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );
   }
 
-  // --- General ---
-
   Widget _tileMoneda(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.attach_money_rounded),
+      leading: _iconContainer(Icons.attach_money_rounded, cs),
       title: const Text('Moneda'),
       subtitle: Text(_settings.moneda),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         final seleccion = await showDialog<String>(
           context: context,
@@ -158,10 +154,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileFormatoFecha(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.calendar_today_rounded),
+      leading: _iconContainer(Icons.calendar_today_rounded, cs),
       title: const Text('Formato de fecha'),
       subtitle: Text(_settings.formatoFechaLabel),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         final seleccion = await showDialog<FormatoFecha>(
           context: context,
@@ -189,10 +185,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileTema(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.palette_rounded),
+      leading: _iconContainer(Icons.palette_rounded, cs),
       title: const Text('Tema'),
       subtitle: Text(_settings.temaLabel),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         final seleccion = await showDialog<TemaApp>(
           context: context,
@@ -218,16 +214,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  // --- Finanzas ---
-
   Widget _tilePresupuesto(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.account_balance_wallet_rounded),
+      leading: _iconContainer(Icons.account_balance_wallet_rounded, cs),
       title: const Text('Presupuesto semanal'),
       subtitle: Text(_settings.presupuestoSemanal > 0
           ? '\$${_settings.presupuestoSemanal.toStringAsFixed(0)}'
           : 'Sin configurar'),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         final controller = TextEditingController(
           text: _settings.presupuestoSemanal > 0
@@ -272,10 +266,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileDiaInicio(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.today_rounded),
+      leading: _iconContainer(Icons.today_rounded, cs),
       title: const Text('Inicio de semana'),
       subtitle: Text(_settings.diaInicioSemanaLabel),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         final seleccion = await showDialog<DiaSemana>(
           context: context,
@@ -303,7 +297,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileReiniciarDatos(ColorScheme cs) {
     return ListTile(
-      leading: Icon(Icons.restore_rounded, color: cs.error),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: cs.error.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(Icons.restore_rounded, color: cs.error, size: 20),
+      ),
       title: Text('Reiniciar datos', style: TextStyle(color: cs.error)),
       subtitle: const Text('Elimina todos los datos de demostración'),
       onTap: () async {
@@ -357,11 +358,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  // --- Notificaciones ---
-
   Widget _tileNotifActivas() {
+    final cs = Theme.of(context).colorScheme;
     return SwitchListTile(
-      secondary: const Icon(Icons.notifications_outlined),
+      secondary: _iconContainer(Icons.notifications_outlined, cs),
       title: const Text('Recordatorios'),
       subtitle: const Text('Recibe un aviso para registrar gastos'),
       value: _settings.notificacionesActivas,
@@ -375,13 +375,13 @@ class _AjustesScreenState extends State<AjustesScreen> {
   Widget _tileHoraRecordatorio(ColorScheme cs) {
     return ListTile(
       enabled: _settings.notificacionesActivas,
-      leading: const Icon(Icons.access_time_rounded),
+      leading: _iconContainer(Icons.access_time_rounded, cs),
       title: const Text('Hora del recordatorio'),
       subtitle: Text(
         TimeOfDay(hour: _settings.horaRecordatorio, minute: _settings.minutoRecordatorio)
             .format(context),
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: _settings.notificacionesActivas
           ? () async {
               final hora = await showTimePicker(
@@ -403,11 +403,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  // --- Datos ---
-
   Widget _tileExportar(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.upload_rounded),
+      leading: _iconContainer(Icons.upload_rounded, cs),
       title: const Text('Exportar respaldo'),
       subtitle: const Text('Guardar datos en archivo JSON'),
       onTap: () async {
@@ -426,7 +424,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileImportar(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.download_rounded),
+      leading: _iconContainer(Icons.download_rounded, cs),
       title: const Text('Importar respaldo'),
       subtitle: const Text('Restaurar desde archivo JSON'),
       onTap: () async {
@@ -461,62 +459,77 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _tileEspacio(ColorScheme cs) {
     return ListTile(
-      leading: const Icon(Icons.storage_rounded),
+      leading: _iconContainer(Icons.storage_rounded, cs),
       title: const Text('Espacio utilizado'),
       subtitle: Text(_formatearEspacio(_espacioBytes)),
     );
   }
 
-  // --- Información ---
-
   Widget _tileVersion() {
-    return const ListTile(
-      leading: Icon(Icons.info_outline_rounded),
-      title: Text('Versión'),
-      subtitle: Text('1.0.0'),
+    final cs = Theme.of(context).colorScheme;
+    return ListTile(
+      leading: _iconContainer(Icons.info_outline_rounded, cs),
+      title: const Text('Versión'),
+      subtitle: const Text('1.0.0'),
     );
   }
 
   Widget _tileEquipo() {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: const Icon(Icons.group_rounded),
-      title: const Text('Equipo desarrollador'),
-      subtitle: const Text('TuAhorro Team'),
-      onTap: () => showAboutDialog(
-        context: context,
-        applicationName: 'TuAhorro',
-        applicationVersion: '1.0.0',
-        children: [
-          const Text('Desarrollado con Flutter.'),
-        ],
+      leading: _iconContainer(Icons.info_rounded, cs),
+      title: const Text('Acerca de TuAhorro'),
+      trailing: _chevron(cs),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AcercaDeScreen()),
       ),
     );
   }
 
   Widget _tilePolitica() {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: const Icon(Icons.privacy_tip_outlined),
+      leading: _iconContainer(Icons.privacy_tip_outlined, cs),
       title: const Text('Política de privacidad'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => _mostrarPlaceholder('Política de privacidad'),
+      trailing: _chevron(cs),
+      onTap: () => _mostrarTextoLegal(
+        'Política de privacidad',
+        'TuAhorro respeta tu privacidad.\n\n'
+        '• Todos tus datos se almacenan localmente en tu dispositivo.\n'
+        '• No recopilamos, transmitimos ni compartimos información personal.\n'
+        '• No utilizamos servicios de análisis ni rastreo.\n'
+        '• Al desinstalar la app, todos los datos se eliminan automáticamente.\n\n'
+        'Última actualización: junio 2026.',
+      ),
     );
   }
 
   Widget _tileTerminos() {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: const Icon(Icons.description_outlined),
+      leading: _iconContainer(Icons.description_outlined, cs),
       title: const Text('Términos y condiciones'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => _mostrarPlaceholder('Términos y condiciones'),
+      trailing: _chevron(cs),
+      onTap: () => _mostrarTextoLegal(
+        'Términos y condiciones',
+        'Al usar TuAhorro aceptas los siguientes términos:\n\n'
+        '• La app se proporciona "tal cual", sin garantías.\n'
+        '• TuAhorro es una herramienta de registro personal y no constituye asesoría financiera.\n'
+        '• Eres responsable de la exactitud de los datos que ingreses.\n'
+        '• No nos hacemos responsables por pérdida de datos debido a fallos del dispositivo.\n'
+        '• Te recomendamos hacer respaldos periódicos desde Ajustes > Exportar respaldo.\n\n'
+        'Última actualización: junio 2026.',
+      ),
     );
   }
 
   Widget _tileReiniciarOnboarding() {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: const Icon(Icons.replay_rounded),
+      leading: _iconContainer(Icons.replay_rounded, cs),
       title: const Text('Repetir tutorial inicial'),
       subtitle: const Text('Volver a ver la guía de bienvenida'),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: _chevron(cs),
       onTap: () async {
         await _actualizar(_settings.copyWith(onboardingCompletado: false));
         if (mounted) {
@@ -528,12 +541,28 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  void _mostrarPlaceholder(String titulo) {
+  Widget _iconContainer(IconData icon, ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: cs.primary, size: 20),
+    );
+  }
+
+  Widget _chevron(ColorScheme cs) {
+    return Icon(Icons.chevron_right_rounded, size: 20,
+        color: cs.onSurfaceVariant.withValues(alpha: 0.4));
+  }
+
+  void _mostrarTextoLegal(String titulo, String contenido) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(titulo),
-        content: const Text('Próximamente.'),
+        content: SingleChildScrollView(child: Text(contenido)),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),

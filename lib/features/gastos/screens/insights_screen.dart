@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/gasto_repository.dart';
 import '../logic/insights_calculator.dart';
@@ -48,11 +49,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-        title: const Text('Insights'),
-      ),
+      appBar: AppBar(title: const Text('Insights')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -69,55 +66,64 @@ class _InsightsScreenState extends State<InsightsScreen> {
     final i = _insight!;
 
     return [
-      // Mensajes principales
       for (final msg in i.mensajes)
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: Card(
-            color: cs.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(Icons.lightbulb_outline, color: cs.onPrimaryContainer),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      msg,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: cs.onPrimaryContainer,
-                      ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cs.subtleSurface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.12)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.auto_awesome_rounded, color: cs.primary, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    msg,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: cs.onSurface,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
 
       const SizedBox(height: 8),
 
-      // Comparación semanal
       _buildCard(
         cs,
         titulo: 'Esta semana vs anterior',
         children: [
           _fila('Semana actual', Formatos.moneda(i.gastoSemanaActual)),
           _fila('Semana anterior', Formatos.moneda(i.gastoSemanaAnterior)),
-          const Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Divider(color: cs.outlineVariant.withValues(alpha: 0.2)),
+          ),
           _fila(
             'Cambio',
             '${i.porcentajeCambio >= 0 ? '+' : ''}${i.porcentajeCambio.toStringAsFixed(1)}%',
-            color: i.porcentajeCambio <= 0 ? Colors.green : Colors.red,
+            color: i.porcentajeCambio <= 0 ? cs.positivo : cs.negativo,
           ),
         ],
       ),
 
-      const SizedBox(height: 8),
+      const SizedBox(height: 12),
 
-      // Promedio diario
       _buildCard(
         cs,
         titulo: 'Promedio diario',
@@ -127,8 +133,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
               Formatos.moneda(i.promedioDiario),
               style: TextStyle(
                 fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
                 color: cs.primary,
+                letterSpacing: -0.5,
               ),
             ),
           ),
@@ -136,15 +143,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
           Center(
             child: Text(
               'por día esta semana',
-              style: TextStyle(color: cs.onSurfaceVariant),
+              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
             ),
           ),
         ],
       ),
 
-      const SizedBox(height: 8),
+      const SizedBox(height: 12),
 
-      // Categoría mayor
       if (i.categoriaMayorId != null)
         _buildCard(
           cs,
@@ -157,7 +163,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     _nombreCategoria(i.categoriaMayorId!),
                     style: TextStyle(
                       fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       color: cs.primary,
                     ),
                   ),
@@ -175,17 +181,21 @@ class _InsightsScreenState extends State<InsightsScreen> {
   }
 
   Widget _buildCard(ColorScheme cs, {required String titulo, required List<Widget> children}) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(titulo, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cs.cardSurface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(titulo, style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant, letterSpacing: 0.2)),
+          const SizedBox(height: 14),
+          ...children,
+        ],
       ),
     );
   }
@@ -196,8 +206,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
-          Text(valor, style: TextStyle(fontWeight: FontWeight.w600, color: color)),
+          Text(label, style: const TextStyle(fontSize: 14)),
+          Text(valor, style: TextStyle(fontWeight: FontWeight.w600, color: color, fontSize: 14)),
         ],
       ),
     );

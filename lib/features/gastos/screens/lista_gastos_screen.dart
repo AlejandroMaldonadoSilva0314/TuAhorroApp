@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/theme_scope.dart';
-import '../../../core/utils/formatos.dart';
-import '../../ajustes/screens/ajustes_screen.dart';
 import '../data/gasto_repository.dart';
 import '../logic/insights_calculator.dart';
 import '../logic/plata_para_hoy.dart';
@@ -147,37 +144,32 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   String _nombreCategoria(String id) =>
       _categorias.where((c) => c.id == id).firstOrNull?.nombre ?? id;
 
+  void _navegarA(Widget screen) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => screen),
+    );
+    await _cargarGastos();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final appTheme = ThemeScope.of(context);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(gradient: appTheme.gradient),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'TuAhorro',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            if (!_cargando && _error == null)
-              Text(
-                'Total: ${Formatos.moneda(_totalGastos)}',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+        title: Text(
+          'TuAhorro',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
               ),
-          ],
         ),
         actions: [
           IconButton(
-            icon: Icon(_mostrarBusqueda ? Icons.search_off : Icons.search),
+            icon: Icon(
+              _mostrarBusqueda ? Icons.search_off_rounded : Icons.search_rounded,
+              size: 22,
+            ),
             onPressed: () {
               setState(() {
                 _mostrarBusqueda = !_mostrarBusqueda;
@@ -191,133 +183,142 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             tooltip: 'Buscar',
           ),
           IconButton(
-            icon: const Icon(Icons.bar_chart_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => EstadisticasScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Estadísticas',
-          ),
-          IconButton(
-            icon: const Icon(Icons.insights_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => InsightsScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Insights',
-          ),
-          IconButton(
-            icon: const Icon(Icons.flag_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MetasScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Metas',
-          ),
-          IconButton(
-            icon: const Icon(Icons.handshake_outlined),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => FiadosScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Fiados',
-          ),
-          IconButton(
-            icon: const Icon(Icons.wallet_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => BolsillosScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Bolsillos',
-          ),
-          IconButton(
-            icon: const Icon(Icons.category_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CategoriasScreen(repository: widget.repository),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Categorías',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => AjustesScreen(
-                    repository: widget.repository,
-                    onSettingsChanged: (s) {
-                      widget.onSettingsChanged?.call(s);
-                    },
-                  ),
-                ),
-              );
-              await _cargarGastos();
-            },
-            tooltip: 'Ajustes',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded, size: 22),
             onPressed: _cargarGastos,
             tooltip: 'Actualizar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.palette_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AjustesScreen()),
-            ),
-            tooltip: 'Personalizar',
           ),
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => RegistroScreen(
-                onGuardar: widget.repository.agregarGasto,
-                bolsillos: _bolsillos,
-                categorias: _categorias,
-              ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navegarA(RegistroScreen(
+          onGuardar: widget.repository.agregarGasto,
+          bolsillos: _bolsillos,
+          categorias: _categorias,
+        )),
+        child: const Icon(Icons.add_rounded),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: cs.outlineVariant.withValues(alpha: 0.15),
             ),
-          );
-          await _cargarGastos();
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Nuevo gasto'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: 0,
+          onDestinationSelected: (index) {
+            switch (index) {
+              case 1:
+                _navegarA(EstadisticasScreen(repository: widget.repository));
+              case 2:
+                _navegarA(BolsillosScreen(repository: widget.repository));
+              case 3:
+                _mostrarMenuMas();
+            }
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: 'Inicio',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined),
+              selectedIcon: Icon(Icons.bar_chart_rounded),
+              label: 'Estadísticas',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.wallet_outlined),
+              selectedIcon: Icon(Icons.wallet_rounded),
+              label: 'Bolsillos',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.more_horiz_rounded),
+              selectedIcon: Icon(Icons.more_horiz_rounded),
+              label: 'Más',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _mostrarMenuMas() {
+    final cs = Theme.of(context).colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            _MenuTile(
+              icon: Icons.auto_awesome_rounded,
+              label: 'Insights',
+              color: cs.primary,
+              onTap: () {
+                Navigator.pop(ctx);
+                _navegarA(InsightsScreen(repository: widget.repository));
+              },
+            ),
+            _MenuTile(
+              icon: Icons.flag_rounded,
+              label: 'Metas de ahorro',
+              color: cs.primary,
+              onTap: () {
+                Navigator.pop(ctx);
+                _navegarA(MetasScreen(repository: widget.repository));
+              },
+            ),
+            _MenuTile(
+              icon: Icons.handshake_outlined,
+              label: 'Fiados',
+              color: cs.primary,
+              onTap: () {
+                Navigator.pop(ctx);
+                _navegarA(FiadosScreen(repository: widget.repository));
+              },
+            ),
+            _MenuTile(
+              icon: Icons.category_rounded,
+              label: 'Categorías',
+              color: cs.primary,
+              onTap: () {
+                Navigator.pop(ctx);
+                _navegarA(CategoriasScreen(repository: widget.repository));
+              },
+            ),
+            _MenuTile(
+              icon: Icons.settings_rounded,
+              label: 'Ajustes',
+              color: cs.primary,
+              onTap: () {
+                Navigator.pop(ctx);
+                _navegarA(AjustesScreen(
+                  repository: widget.repository,
+                  onSettingsChanged: (s) {
+                    widget.onSettingsChanged?.call(s);
+                  },
+                ));
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBody() {
     if (_cargando) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      );
     }
 
     if (_error != null) {
@@ -325,8 +326,11 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 12),
+            Icon(Icons.error_outline_rounded, size: 48,
+                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.6)),
+            const SizedBox(height: 16),
+            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            const SizedBox(height: 16),
             FilledButton(onPressed: _cargarGastos, child: const Text('Reintentar')),
           ],
         ),
@@ -334,8 +338,26 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
     }
 
     if (_gastos.isEmpty) {
-      return const Center(
-        child: Text('No hay gastos registrados aún.'),
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.receipt_long_outlined, size: 48,
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
+            ),
+            const SizedBox(height: 20),
+            Text('No hay movimientos', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Text('Toca + para agregar el primero',
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
       );
     }
 
@@ -350,14 +372,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         disponibleSemana: _disponibleSemana,
         onEditarPresupuesto: _actualizarPresupuesto,
         insightMensajes: _insightMensajes,
-        onTapInsights: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => InsightsScreen(repository: widget.repository),
-            ),
-          );
-          await _cargarGastos();
-        },
+        onTapInsights: () => _navegarA(InsightsScreen(repository: widget.repository)),
       ),
     ];
 
@@ -395,10 +410,24 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       );
     }
 
+    headerWidgets.add(
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+        child: Text(
+          'Movimientos recientes',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                letterSpacing: 0.2,
+              ),
+        ),
+      ),
+    );
+
     return RefreshIndicator(
       onRefresh: _cargarGastos,
+      color: Theme.of(context).colorScheme.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.only(top: 8, bottom: 80),
+        padding: const EdgeInsets.only(top: 0, bottom: 80),
         itemCount: _gastosFiltrados.length + headerWidgets.length,
         itemBuilder: (context, index) {
           if (index < headerWidgets.length) {
@@ -434,8 +463,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
                 )
               : null,
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         ),
         onChanged: (valor) {
           _filtro = valor.isEmpty
@@ -456,7 +484,6 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         spacing: 8,
         runSpacing: 4,
         children: [
-          // Tipo
           FilterChip(
             label: const Text('Ingreso'),
             selected: _filtro.tipo == TipoTransaccion.ingreso,
@@ -483,7 +510,6 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             },
             selectedColor: colorScheme.primaryContainer,
           ),
-          // Categoría
           ChoiceChip(
             label: Text(_filtro.categoriaId != null
                 ? _nombreCategoria(_filtro.categoriaId!)
@@ -500,7 +526,6 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
                   )
                 : null,
           ),
-          // Rango de fechas
           ActionChip(
             label: Text(
               _filtro.fechaDesde != null || _filtro.fechaHasta != null
@@ -532,10 +557,10 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       builder: (ctx) => ListView(
         shrinkWrap: true,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Text('Seleccionar categoría',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                style: Theme.of(context).textTheme.titleMedium),
           ),
           ..._categorias.map(
             (cat) => ListTile(
@@ -580,5 +605,37 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
     }
     if (_filtro.fechaDesde != null) return 'Desde ${fmt(_filtro.fechaDesde!)}';
     return 'Hasta ${fmt(_filtro.fechaHasta!)}';
+  }
+}
+
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+      trailing: Icon(Icons.chevron_right_rounded, size: 20,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+      onTap: onTap,
+    );
   }
 }

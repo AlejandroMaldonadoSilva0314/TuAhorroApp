@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/gasto_repository.dart';
 import '../models/bolsillo.dart';
@@ -147,11 +148,7 @@ class _BolsillosScreenState extends State<BolsillosScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bolsillos'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
+      appBar: AppBar(title: const Text('Bolsillos')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _bolsillos.isEmpty
@@ -159,16 +156,26 @@ class _BolsillosScreenState extends State<BolsillosScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.wallet_rounded, size: 64, color: colorScheme.outlineVariant),
-                      const SizedBox(height: 12),
-                      const Text('No tienes bolsillos aún'),
-                      const SizedBox(height: 8),
-                      const Text('Crea uno para organizar tu dinero', style: TextStyle(fontSize: 13)),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.wallet_rounded, size: 48,
+                            color: colorScheme.primary.withValues(alpha: 0.5)),
+                      ),
+                      const SizedBox(height: 20),
+                      Text('No tienes bolsillos aún',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 6),
+                      Text('Crea uno para organizar tu dinero',
+                          style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.only(top: 8, bottom: 80),
+                  padding: const EdgeInsets.only(top: 12, bottom: 80),
                   itemCount: _bolsillos.length,
                   itemBuilder: (context, index) {
                     final b = _bolsillos[index];
@@ -181,12 +188,9 @@ class _BolsillosScreenState extends State<BolsillosScreen> {
                     );
                   },
                 ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarDialogo(),
-        icon: const Icon(Icons.add),
-        label: const Text('Nuevo bolsillo'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -210,30 +214,59 @@ class _BolsilloCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final esPositivo = saldo >= 0;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.primaryContainer,
-          child: Icon(Icons.wallet_rounded, color: colorScheme.primary),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.cardSurface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colorScheme.cardBorder),
         ),
-        title: Text(bolsillo.nombre, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(
-          Formatos.moneda(saldo.abs()),
-          style: TextStyle(
-            color: esPositivo ? Colors.green.shade700 : colorScheme.error,
-            fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: colorScheme.accentGradient,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(bolsillo.nombre,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    Text(
+                      Formatos.moneda(saldo.abs()),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: esPositivo ? colorScheme.positivo : colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                onSelected: (v) {
+                  if (v == 'editar') onEditar();
+                  if (v == 'eliminar') onEliminar();
+                },
+                icon: Icon(Icons.more_vert_rounded, color: colorScheme.onSurfaceVariant),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'editar', child: Text('Editar')),
+                  PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
+                ],
+              ),
+            ],
           ),
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (v) {
-            if (v == 'editar') onEditar();
-            if (v == 'eliminar') onEliminar();
-          },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'editar', child: Text('Editar')),
-            PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
-          ],
         ),
       ),
     );

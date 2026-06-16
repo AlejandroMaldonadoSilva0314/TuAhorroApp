@@ -31,7 +31,7 @@ class NotificacionService {
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(settings: initSettings);
 
     final config = await cargarConfig();
     if (config.activado) {
@@ -98,6 +98,6 @@ class NotificacionService {
   }
 
   Future<void> cancelar() async {
-    await _plugin.cancel(_notifId);
+    await _plugin.cancel(id: _notifId);
   }
 }
