@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/formatos.dart';
+import '../../presupuesto/data/presupuesto_repository.dart';
+import '../../presupuesto/services/presupuesto_semanal_service.dart';
+import '../../presupuesto/widgets/presupuesto_semanal_card.dart';
 import '../data/gasto_repository.dart';
 import '../models/gasto.dart';
 import '../widgets/dashboard_resumen.dart';
@@ -21,6 +24,10 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   bool _cargando = true;
   String? _error;
 
+  final _presupuestoRepo = PresupuestoRepository();
+  final _presupuestoService = const PresupuestoSemanalService();
+  double _presupuestoSemanal = 0;
+
   @override
   void initState() {
     super.initState();
@@ -33,10 +40,14 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       _error = null;
     });
     try {
-      final gastos = await widget.repository.obtenerGastos();
+      final resultados = await Future.wait([
+        widget.repository.obtenerGastos(),
+        _presupuestoRepo.obtener(),
+      ]);
       if (mounted) {
         setState(() {
-          _gastos = gastos;
+          _gastos = resultados[0] as List<Gasto>;
+          _presupuestoSemanal = resultados[1] as double;
           _cargando = false;
         });
       }
@@ -64,6 +75,51 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       .fold(0, (sum, g) => sum + g.monto);
 
   double get _saldo => _totalIngresos - _totalGastos;
+
+  ResumenSemanal get _resumenSemanal =>
+      _presupuestoService.calcularResumen(_presupuestoSemanal, _gastos);
+
+  Future<void> _editarPresupuesto() async {
+    final controller = TextEditingController(
+      text: _presupuestoSemanal > 0
+          ? _presupuestoSemanal.toStringAsFixed(0)
+          : '',
+    );
+    final resultado = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Presupuesto semanal'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(
+            prefixText: '\$ ',
+            hintText: 'Ej: 200000',
+            labelText: 'Monto semanal',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final valor =
+                  double.tryParse(controller.text.replaceAll(',', ''));
+              Navigator.pop(ctx, valor);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+    if (resultado != null && resultado > 0) {
+      await _presupuestoRepo.guardar(resultado);
+      setState(() => _presupuestoSemanal = resultado);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +200,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       onRefresh: _cargarGastos,
       child: ListView.builder(
         padding: const EdgeInsets.only(top: 8, bottom: 80),
-        itemCount: _gastos.length + 1,
+        itemCount: _gastos.length + 2,
         itemBuilder: (context, index) {
           if (index == 0) {
             return DashboardResumen(
@@ -153,7 +209,13 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
               saldo: _saldo,
             );
           }
-          final gasto = _gastos[index - 1];
+          if (index == 1) {
+            return PresupuestoSemanalCard(
+              resumen: _resumenSemanal,
+              onEditarPresupuesto: _editarPresupuesto,
+            );
+          }
+          final gasto = _gastos[index - 2];
           return GastoCard(
             gasto: gasto,
             onEliminar: () => _eliminarGasto(gasto.id),
