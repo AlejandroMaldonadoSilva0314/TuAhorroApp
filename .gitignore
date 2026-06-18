@@ -1,3 +1,6 @@
+# Tool metadata
+.tool_appdata/
+
 # Miscellaneous
 *.class
 *.log
@@ -30,3 +33,8 @@ migrate_working_dir/
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Release signing
+android/key.properties
+*.jks
+*.keystore

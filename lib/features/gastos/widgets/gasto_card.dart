@@ -1,82 +1,142 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
+import '../models/categoria.dart';
 import '../models/gasto.dart';
 
 class GastoCard extends StatelessWidget {
   const GastoCard({
     super.key,
     required this.gasto,
+    required this.categorias,
     this.onEliminar,
   });
 
   final Gasto gasto;
+  final List<Categoria> categorias;
   final VoidCallback? onEliminar;
+
+  Categoria? get _categoria =>
+      categorias.where((c) => c.id == gasto.categoriaId).firstOrNull;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final cat = _categoria;
+    final esIngreso = gasto.tipo == TipoTransaccion.ingreso;
+    final montoColor = esIngreso ? cs.positivo : cs.error;
+    final iconBg = esIngreso
+        ? cs.positivo.withValues(alpha: 0.12)
+        : cs.error.withValues(alpha: 0.10);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: colorScheme.outlineVariant),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.primaryContainer,
-          child: Icon(
-            _iconoPorCategoria(gasto.categoria),
-            color: colorScheme.onPrimaryContainer,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          gasto.titulo,
-          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          '${gasto.categoria.nombre} · ${Formatos.fecha(gasto.fecha)}',
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              Formatos.moneda(gasto.monto),
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          onLongPress: onEliminar,
+          child: Container(
+            decoration: BoxDecoration(
+              color: cs.cardSurface,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(color: cs.cardBorder),
+              boxShadow: AppShadows.card,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              child: IntrinsicHeight(
+                child: Row(
+                  children: [
+                    // Borde lateral de color semántico
+                    Container(
+                      width: 3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            montoColor,
+                            montoColor.withValues(alpha: 0.4),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Contenido
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            // Ícono de categoría
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: iconBg,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.md),
+                              ),
+                              child: Icon(
+                                cat?.icono ?? Icons.category_outlined,
+                                color: montoColor,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            // Título y categoría
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    gasto.titulo,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.1,
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '${cat?.nombre ?? gasto.categoriaId} · ${Formatos.fecha(gasto.fecha)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Monto
+                            Text(
+                              '${esIngreso ? '+' : '−'}${Formatos.moneda(gasto.monto)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: montoColor,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            if (onEliminar != null)
-              IconButton(
-                icon: Icon(Icons.delete_outline,
-                    color: colorScheme.error, size: 20),
-                onPressed: onEliminar,
-                tooltip: 'Eliminar gasto',
-              ),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  IconData _iconoPorCategoria(CategoriaGasto categoria) {
-    return switch (categoria) {
-      CategoriaGasto.comida => Icons.restaurant_outlined,
-      CategoriaGasto.transporte => Icons.directions_bus_outlined,
-      CategoriaGasto.servicios => Icons.receipt_long_outlined,
-      CategoriaGasto.entretenimiento => Icons.movie_outlined,
-      CategoriaGasto.salud => Icons.local_hospital_outlined,
-      CategoriaGasto.educacion => Icons.school_outlined,
-      CategoriaGasto.otros => Icons.category_outlined,
-    };
   }
 }

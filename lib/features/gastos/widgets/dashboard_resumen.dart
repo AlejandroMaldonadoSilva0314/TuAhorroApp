@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/theme_scope.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 
 class DashboardResumen extends StatelessWidget {
@@ -14,6 +14,8 @@ class DashboardResumen extends StatelessWidget {
     required this.gastadoSemana,
     required this.disponibleSemana,
     required this.onEditarPresupuesto,
+    this.insightMensajes = const [],
+    this.onTapInsights,
   });
 
   final double ingresos;
@@ -24,186 +26,380 @@ class DashboardResumen extends StatelessWidget {
   final double gastadoSemana;
   final double disponibleSemana;
   final ValueChanged<double> onEditarPresupuesto;
+  final List<String> insightMensajes;
+  final VoidCallback? onTapInsights;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final pct = presupuestoSemanal > 0
+        ? (gastadoSemana / presupuestoSemanal).clamp(0.0, 1.0)
+        : null;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base, AppSpacing.sm, AppSpacing.base, AppSpacing.base,
+      ),
       child: Column(
         children: [
-          // --- Saldo principal ---
-          _TarjetaSaldo(saldo: saldo),
-          const SizedBox(height: 12),
-          // --- Plata para Hoy ---
-          _TarjetaPlataHoy(monto: plataParaHoy),
-          const SizedBox(height: 12),
-          // --- Presupuesto semanal ---
+          _HeroPlataHoy(monto: plataParaHoy, porcentajePresupuesto: pct),
+          const SizedBox(height: AppSpacing.md),
+          _FilaTresStats(
+            saldo: saldo,
+            ingresos: ingresos,
+            gastos: gastos,
+          ),
+          const SizedBox(height: AppSpacing.md),
           _TarjetaPresupuesto(
             presupuesto: presupuestoSemanal,
             gastado: gastadoSemana,
             disponible: disponibleSemana,
             onEditar: onEditarPresupuesto,
           ),
-          const SizedBox(height: 12),
-          // --- Ingresos / Gastos ---
-          Row(
-            children: [
-              Expanded(
-                child: _TarjetaIndicador(
-                  label: 'Ingresos',
-                  monto: ingresos,
-                  icono: Icons.arrow_upward_rounded,
-                  color: colorScheme.primary,
-                  colorFondo: colorScheme.primaryContainer.withValues(alpha: 0.4),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _TarjetaIndicador(
-                  label: 'Gastos',
-                  monto: gastos,
-                  icono: Icons.arrow_downward_rounded,
-                  color: colorScheme.error,
-                  colorFondo: colorScheme.errorContainer.withOpacity(0.3),
-                ),
-              ),
-            ],
-          ),
+          if (insightMensajes.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            _TarjetaInsights(mensajes: insightMensajes, onTap: onTapInsights),
+          ],
         ],
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
+// ── HERO: PLATA PARA HOY ─────────────────────────────────────────────────────
 
-class _TarjetaSaldo extends StatelessWidget {
-  const _TarjetaSaldo({required this.saldo});
+class _HeroPlataHoy extends StatelessWidget {
+  const _HeroPlataHoy({required this.monto, this.porcentajePresupuesto});
 
-  final double saldo;
+  final double monto;
+  final double? porcentajePresupuesto;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final appTheme = ThemeScope.of(context);
-    final esPositivo = saldo >= 0;
-    final color = esPositivo ? colorScheme.primary : colorScheme.error;
+    final esPositivo = monto >= 0;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            appTheme.gradientColors[0].withValues(alpha: 0.15),
-            appTheme.gradientColors[1].withValues(alpha: 0.08),
-          ],
+        gradient: esPositivo ? AppGradients.hero : const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          colors: [Color(0xFF3B1010), Color(0xFF7F1D1D)],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: appTheme.gradientColors[1].withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        boxShadow: AppShadows.hero,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        child: Stack(
+          children: [
+            // Círculos decorativos de profundidad
+            Positioned(
+              top: -36,
+              right: -36,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -50,
+              right: 24,
+              child: Container(
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.04),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 20,
+              right: 80,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.03),
+                ),
+              ),
+            ),
+            // Contenido
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Label con ícono
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: const Icon(
+                          Icons.today_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Plata para Hoy',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.90),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Día de la semana
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Text(
+                          _diaAbreviado(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.85),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // Monto principal
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      Formatos.moneda(monto.abs()),
+                      style: AppTypography.heroAmount,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  // Subtítulo
+                  Text(
+                    esPositivo
+                        ? 'Disponible para gastar hoy'
+                        : 'Sin presupuesto disponible',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.72),
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                  // Barra de progreso semanal (si hay presupuesto)
+                  if (porcentajePresupuesto != null) ...[
+                    const SizedBox(height: AppSpacing.base),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              Container(
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                                ),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: porcentajePresupuesto!,
+                                child: Container(
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: porcentajePresupuesto! > 0.9
+                                        ? const Color(0xFFFFB86C)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          '${(porcentajePresupuesto! * 100).round()}% sem.',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.70),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  String _diaAbreviado() {
+    const dias = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+    return dias[DateTime.now().weekday % 7];
+  }
+}
+
+// ── FILA TRES STATS (3 COLUMNAS IGUALES) — Nubank / Revolut style ────────────
+
+class _FilaTresStats extends StatelessWidget {
+  const _FilaTresStats({
+    required this.saldo,
+    required this.ingresos,
+    required this.gastos,
+  });
+
+  final double saldo;
+  final double ingresos;
+  final double gastos;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final saldoPositivo = saldo >= 0;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _StatCell(
+            label: 'Saldo',
+            monto: saldo.abs(),
+            signo: saldoPositivo ? '' : '−',
+            icono: Icons.account_balance_wallet_rounded,
+            color: saldoPositivo ? cs.positivo : cs.error,
+            cs: cs,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _StatCell(
+            label: 'Ingresos',
+            monto: ingresos,
+            icono: Icons.south_west_rounded,
+            color: cs.positivo,
+            cs: cs,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _StatCell(
+            label: 'Gastos',
+            monto: gastos,
+            icono: Icons.north_east_rounded,
+            color: cs.error,
+            cs: cs,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCell extends StatelessWidget {
+  const _StatCell({
+    required this.label,
+    required this.monto,
+    required this.icono,
+    required this.color,
+    required this.cs,
+    this.signo = '',
+  });
+
+  final String label;
+  final double monto;
+  final IconData icono;
+  final Color color;
+  final ColorScheme cs;
+  final String signo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: cs.cardSurface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.account_balance_wallet_outlined,
-                  size: 18, color: colorScheme.onSurfaceVariant),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Icon(icono, size: 13, color: color),
+              ),
               const SizedBox(width: 6),
-              Text(
-                'Saldo disponible',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colorScheme.onSurfaceVariant,
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 0.1,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            Formatos.moneda(saldo.abs()),
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          if (!esPositivo)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'Gastos superan los ingresos',
-                style: TextStyle(fontSize: 11, color: colorScheme.error),
+          const SizedBox(height: AppSpacing.sm),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '$signo${Formatos.moneda(monto)}',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: color,
+                letterSpacing: -0.4,
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TarjetaPlataHoy extends StatelessWidget {
-  const _TarjetaPlataHoy({required this.monto});
-
-  final double monto;
-
-  @override
-  Widget build(BuildContext context) {
-    final appTheme = ThemeScope.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      decoration: BoxDecoration(
-        gradient: appTheme.gradientCard,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.today_rounded, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Plata para Hoy',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  Formatos.moneda(monto),
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
 }
+
+// ── TARJETA PRESUPUESTO SEMANAL ───────────────────────────────────────────────
 
 class _TarjetaPresupuesto extends StatelessWidget {
   const _TarjetaPresupuesto({
@@ -220,90 +416,160 @@ class _TarjetaPresupuesto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final tienePresupuesto = presupuesto > 0;
     final progreso = tienePresupuesto ? (gastado / presupuesto).clamp(0.0, 1.0) : 0.0;
     final excedido = tienePresupuesto && gastado > presupuesto;
+    final progresoColor = excedido ? cs.error : cs.primary;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
+        color: cs.cardSurface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded, size: 18, color: colorScheme.primary),
-              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Icon(Icons.calendar_month_rounded,
+                    size: 16, color: cs.primary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Presupuesto semanal',
-                style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
               ),
               const Spacer(),
               GestureDetector(
                 onTap: () => _mostrarDialogo(context),
-                child: Icon(
-                  tienePresupuesto ? Icons.edit_rounded : Icons.add_circle_outline,
-                  size: 20,
-                  color: colorScheme.primary,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Icon(
+                    tienePresupuesto ? Icons.edit_rounded : Icons.add_rounded,
+                    size: 14,
+                    color: cs.primary,
+                  ),
                 ),
               ),
             ],
           ),
           if (!tienePresupuesto) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.md),
             GestureDetector(
               onTap: () => _mostrarDialogo(context),
               child: Text(
                 'Toca para definir tu presupuesto',
-                style: TextStyle(fontSize: 13, color: colorScheme.primary, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: cs.primary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ] else ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: progreso,
-                minHeight: 8,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                color: excedido ? colorScheme.error : colorScheme.primary,
-              ),
+            const SizedBox(height: AppSpacing.base),
+            // Barra de progreso premium
+            Stack(
+              children: [
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+                FractionallySizedBox(
+                  widthFactor: progreso,
+                  child: Container(
+                    height: 10,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: excedido
+                            ? [cs.error, cs.error.withValues(alpha: 0.8)]
+                            : [
+                                const Color(0xFF7B2FF7),
+                                const Color(0xFFA855F7),
+                              ],
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      boxShadow: [
+                        BoxShadow(
+                          color: progresoColor.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.md),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _MiniIndicador(
                   label: 'Presupuesto',
                   monto: presupuesto,
-                  color: colorScheme.onSurfaceVariant,
+                  color: cs.onSurfaceVariant,
                 ),
                 _MiniIndicador(
                   label: 'Gastado',
                   monto: gastado,
-                  color: excedido ? colorScheme.error : colorScheme.onSurfaceVariant,
+                  color: excedido ? cs.error : cs.onSurfaceVariant,
                 ),
                 _MiniIndicador(
                   label: 'Disponible',
                   monto: disponible,
-                  color: colorScheme.primary,
+                  color: cs.positivo,
                 ),
               ],
             ),
-            if (excedido)
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  'Excediste tu presupuesto semanal',
-                  style: TextStyle(fontSize: 11, color: colorScheme.error),
+            if (excedido) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                decoration: BoxDecoration(
+                  color: cs.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 13, color: cs.error),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'Excediste tu presupuesto',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: cs.error,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
               ),
+            ],
           ],
         ],
       ),
@@ -329,7 +595,9 @@ class _TarjetaPresupuesto extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
           FilledButton(
             onPressed: () {
               final valor = double.tryParse(controller.text) ?? 0;
@@ -359,68 +627,110 @@ class _MiniIndicador extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 10, color: color)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10, color: color, fontWeight: FontWeight.w600)),
         const SizedBox(height: 2),
         Text(
           Formatos.moneda(monto),
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w700, color: color),
         ),
       ],
     );
   }
 }
 
-class _TarjetaIndicador extends StatelessWidget {
-  const _TarjetaIndicador({
-    required this.label,
-    required this.monto,
-    required this.icono,
-    required this.color,
-    required this.colorFondo,
-  });
+// ── TARJETA INSIGHTS ─────────────────────────────────────────────────────────
 
-  final String label;
-  final double monto;
-  final IconData icono;
-  final Color color;
-  final Color colorFondo;
+class _TarjetaInsights extends StatelessWidget {
+  const _TarjetaInsights({required this.mensajes, this.onTap});
+
+  final List<String> mensajes;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-      decoration: BoxDecoration(
-        color: colorFondo,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icono, size: 14, color: color),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.base),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.primary.withValues(alpha: 0.10),
+              cs.primary.withValues(alpha: 0.04),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            Formatos.moneda(monto),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(
+            color: cs.primary.withValues(alpha: 0.20),
           ),
-        ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Icon(Icons.auto_awesome_rounded,
+                      size: 15, color: cs.primary),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Insights',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                if (onTap != null)
+                  Icon(Icons.chevron_right_rounded,
+                      size: 18, color: cs.onSurfaceVariant),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            for (final msg in mensajes)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5, right: 6),
+                      child: Container(
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: cs.primary.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        msg,
+                        style: TextStyle(
+                            fontSize: 13, color: cs.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
