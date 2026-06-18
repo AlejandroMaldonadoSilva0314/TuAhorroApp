@@ -86,15 +86,14 @@ class _HeroPlataHoy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final esPositivo = monto >= 0;
+    final cs = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: esPositivo
-            ? Theme.of(context).colorScheme.heroGradient
-            : AppGradients.danger,
+        gradient: esPositivo ? cs.heroGradient : AppGradients.danger,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: AppShadows.hero,
+        boxShadow: cs.heroShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.xxl),
@@ -357,7 +356,7 @@ class _StatCell extends StatelessWidget {
         color: cs.cardSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,10 +433,10 @@ class _TarjetaPresupuesto extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
-        color: cs.cardSurface,
+        color: cs.presupuestoSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,10 +667,10 @@ class _TarjetaDineroPorCobrar extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: cs.cardSurface,
+        color: cs.alertaSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -893,17 +892,10 @@ class _TarjetaInsights extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              cs.primary.withValues(alpha: 0.10),
-              cs.primary.withValues(alpha: 0.04),
-            ],
-          ),
+          gradient: cs.insightGradient,
           borderRadius: BorderRadius.circular(AppRadius.xl),
           border: Border.all(
-            color: cs.primary.withValues(alpha: 0.20),
+            color: cs.insightAccent.withValues(alpha: 0.25),
           ),
         ),
         child: Column(
@@ -914,11 +906,11 @@ class _TarjetaInsights extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.12),
+                    color: cs.insightAccent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Icon(Icons.auto_awesome_rounded,
-                      size: 15, color: cs.primary),
+                      size: 15, color: cs.insightAccent),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
@@ -949,7 +941,7 @@ class _TarjetaInsights extends StatelessWidget {
                         height: 4,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: cs.primary.withValues(alpha: 0.6),
+                          color: cs.insightAccent.withValues(alpha: 0.6),
                         ),
                       ),
                     ),

@@ -250,7 +250,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: cs.surface,
+          color: cs.navBarSurface,
           border: Border(
             top: BorderSide(
               color: cs.outlineVariant.withValues(alpha: 0.15),
@@ -259,9 +259,14 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.30),
-              blurRadius: 24,
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.06),
+              blurRadius: 20,
               offset: const Offset(0, -4),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, -1),
             ),
           ],
         ),

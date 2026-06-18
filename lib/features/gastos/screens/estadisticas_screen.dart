@@ -158,7 +158,7 @@ class _HeaderResumen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: Theme.of(context).colorScheme.heroGradient,
-        boxShadow: AppShadows.hero,
+        boxShadow: Theme.of(context).colorScheme.heroShadow,
       ),
       child: SafeArea(
         bottom: false,
@@ -350,7 +350,7 @@ class _TarjetaMayorCategoria extends StatelessWidget {
         color: cs.cardSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: Row(
         children: [
@@ -414,7 +414,7 @@ class _TarjetaTop3 extends StatelessWidget {
         color: cs.cardSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,7 +505,7 @@ class _GraficoBarras extends StatelessWidget {
         color: cs.cardSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
-        boxShadow: AppShadows.card,
+        boxShadow: cs.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

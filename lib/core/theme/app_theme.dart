@@ -44,14 +44,36 @@ class AppTheme {
     TemaColor.lavender     => const Color(0xFF1C1735),
   };
 
+  // Light mode: fondos sutilmente tintados según el tema — cada tema tiene personalidad propia
+  static Color _lightSurfaceForTema(TemaColor t) => switch (t) {
+    TemaColor.premiumRoyal => const Color(0xFFF5F0FF), // lavanda suave
+    TemaColor.midnight     => const Color(0xFFF0F4FA), // gris perla
+    TemaColor.aurora       => const Color(0xFFEEF8FF), // azul cielo pálido
+    TemaColor.emerald      => const Color(0xFFEEFAF4), // menta suave
+    TemaColor.sunset       => const Color(0xFFFFF6F0), // durazno pálido
+    TemaColor.ruby         => const Color(0xFFFFF0F3), // rosa pálido
+    TemaColor.lavender     => const Color(0xFFF7F0FF), // lavanda cálida
+  };
+
+  // Light mode: cards ligeramente tintadas — flotan sobre el fondo del tema
+  static Color _lightCardForTema(TemaColor t) => switch (t) {
+    TemaColor.premiumRoyal => const Color(0xFFFEFBFF),
+    TemaColor.midnight     => const Color(0xFFFAFBFE),
+    TemaColor.aurora       => const Color(0xFFF8FCFF),
+    TemaColor.emerald      => const Color(0xFFF7FEFA),
+    TemaColor.sunset       => const Color(0xFFFFFBF8),
+    TemaColor.ruby         => const Color(0xFFFFFBFC),
+    TemaColor.lavender     => const Color(0xFFFDF8FF),
+  };
+
   static ThemeData _build(Brightness brightness, TemaColor temaColor) {
     final isDark = brightness == Brightness.dark;
     final seed = _seedForTema(temaColor);
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: brightness,
-      surface: isDark ? _darkSurfaceForTema(temaColor) : const Color(0xFFF7F6FC),
-      surfaceContainerLowest: isDark ? _darkCardForTema(temaColor) : Colors.white,
+      surface: isDark ? _darkSurfaceForTema(temaColor) : _lightSurfaceForTema(temaColor),
+      surfaceContainerLowest: isDark ? _darkCardForTema(temaColor) : _lightCardForTema(temaColor),
     );
 
     final textTheme = _textTheme(colorScheme);
@@ -83,11 +105,12 @@ class AppTheme {
       ),
 
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: isDark ? 0 : 2,
+        shadowColor: isDark ? Colors.transparent : colorScheme.primary.withValues(alpha: 0.12),
+        surfaceTintColor: Colors.transparent,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: colorScheme.surfaceContainerLowest,
-        shadowColor: Colors.black.withValues(alpha: 0.18),
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -128,7 +151,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF1B1630) : Colors.white,
+        backgroundColor: colorScheme.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
       ),
 
@@ -136,7 +159,7 @@ class AppTheme {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        backgroundColor: isDark ? const Color(0xFF1B1630) : Colors.white,
+        backgroundColor: colorScheme.surfaceContainerLowest,
         showDragHandle: true,
         elevation: 0,
       ),
@@ -155,7 +178,7 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
         elevation: 0,
-        backgroundColor: isDark ? colorScheme.surface : Colors.white,
+        backgroundColor: isDark ? colorScheme.surface : colorScheme.surfaceContainerLowest,
         surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.primary.withValues(alpha: 0.15),
         labelTextStyle: WidgetStatePropertyAll(
@@ -185,7 +208,9 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: isDark ? const Color(0xFF241B3E) : const Color(0xFF1B1630),
+        backgroundColor: isDark
+            ? colorScheme.surfaceContainerHigh
+            : colorScheme.inverseSurface,
       ),
     );
   }

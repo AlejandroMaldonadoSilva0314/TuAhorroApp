@@ -283,9 +283,10 @@ class _BolsilloCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          gradient: cs.accentGradient,
+          gradient: cs.cardGradient,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: cs.cardBorder),
+          boxShadow: cs.cardShadow,
         ),
         child: Row(
           children: [
@@ -307,9 +308,9 @@ class _BolsilloCard extends StatelessWidget {
                           bolsillo.progreso >= 1.0
                               ? cs.positivo
                               : bolsillo.progreso >= 0.6
-                                  ? const Color(0xFF10B981)
+                                  ? cs.positivo
                                   : bolsillo.progreso >= 0.3
-                                      ? const Color(0xFFF59E0B)
+                                      ? cs.alerta
                                       : cs.primaryContainer,
                         ),
                       ),
@@ -756,13 +757,7 @@ class _FABPremium extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: cs.accentGradient,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: [
-          BoxShadow(
-            color: cs.positivo.withValues(alpha: 0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: cs.fabShadow,
       ),
       child: FloatingActionButton.extended(
         onPressed: onPressed,

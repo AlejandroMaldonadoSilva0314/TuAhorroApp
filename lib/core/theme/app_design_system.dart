@@ -111,6 +111,20 @@ class AppGradients {
     colors: [Color(0xFF1E3A5F), Color(0xFF2563EB), Color(0xFF7C3AED)],
     stops: [0.0, 0.5, 1.0],
   );
+
+  // Light Mode — Insight (verde suave → menta)
+  static const LinearGradient lightInsight = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFECFDF5), Color(0xFFF0FDF4)],
+  );
+
+  // Light Mode — Presupuesto (lavanda pastel)
+  static const LinearGradient lightPresupuesto = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF0EDFF), Color(0xFFF7F5FF)],
+  );
 }
 
 // ── APP SPACING ───────────────────────────────────────────────────────────────
@@ -150,22 +164,22 @@ class AppShadows {
 
   static List<BoxShadow> get card => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.25),
-      blurRadius: 16,
-      offset: const Offset(0, 4),
+      color: Colors.black.withValues(alpha: 0.10),
+      blurRadius: 12,
+      offset: const Offset(0, 2),
     ),
   ];
 
   static List<BoxShadow> get hero => [
     BoxShadow(
-      color: AppColors.primary.withValues(alpha: 0.35),
-      blurRadius: 32,
-      offset: const Offset(0, 12),
+      color: AppColors.primary.withValues(alpha: 0.30),
+      blurRadius: 28,
+      offset: const Offset(0, 10),
     ),
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.20),
-      blurRadius: 16,
-      offset: const Offset(0, 4),
+      color: Colors.black.withValues(alpha: 0.10),
+      blurRadius: 12,
+      offset: const Offset(0, 3),
     ),
   ];
 
@@ -187,9 +201,9 @@ class AppShadows {
 
   static List<BoxShadow> get navBar => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.30),
-      blurRadius: 24,
-      offset: const Offset(0, -4),
+      color: Colors.black.withValues(alpha: 0.10),
+      blurRadius: 16,
+      offset: const Offset(0, -2),
     ),
   ];
 }
@@ -223,6 +237,7 @@ class AppTypography {
 
   static const String fontFamily = 'Roboto';
 
+  // Solo heroAmount lleva color fijo — siempre va sobre superficie con gradiente vívido.
   static const TextStyle heroAmount = TextStyle(
     fontSize: 52,
     fontWeight: FontWeight.w900,
@@ -231,30 +246,27 @@ class AppTypography {
     height: 1.0,
   );
 
+  // Los estilos siguientes heredan el color del TextTheme activo (cs.onSurface / onSurfaceVariant).
   static const TextStyle largeAmount = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.w800,
-    color: AppColors.textPrimary,
     letterSpacing: -0.8,
   );
 
   static const TextStyle sectionLabel = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.w700,
-    color: AppColors.textTertiary,
     letterSpacing: 1.5,
   );
 
   static const TextStyle cardTitle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
     letterSpacing: -0.2,
   );
 
   static const TextStyle cardSubtitle = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    color: AppColors.textTertiary,
   );
 }

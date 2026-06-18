@@ -42,7 +42,7 @@ class GastoCard extends StatelessWidget {
               color: cs.cardSurface,
               borderRadius: BorderRadius.circular(AppRadius.xl),
               border: Border.all(color: cs.cardBorder),
-              boxShadow: AppShadows.card,
+              boxShadow: cs.cardShadow,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.xl),

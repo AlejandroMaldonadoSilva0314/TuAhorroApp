@@ -208,11 +208,11 @@ class _Encabezado extends StatelessWidget {
                           child: CircularProgressIndicator(
                             value: progreso,
                             strokeWidth: 7,
-                            backgroundColor: cs.cardBorder,
+                            backgroundColor: Colors.white.withValues(alpha: 0.20),
                             valueColor: AlwaysStoppedAnimation(
                               progreso >= 1.0
                                   ? cs.positivo
-                                  : cs.primaryContainer,
+                                  : Colors.white,
                             ),
                           ),
                         ),
@@ -224,7 +224,7 @@ class _Encabezado extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w900,
-                                color: cs.onSurface,
+                                color: cs.onGradientSurface,
                                 letterSpacing: -0.8,
                                 height: 1.0,
                               ),
@@ -234,7 +234,7 @@ class _Encabezado extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: cs.onSurfaceVariant,
+                                color: cs.onGradientSubtle,
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -254,7 +254,7 @@ class _Encabezado extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: cs.onSurfaceVariant,
+                            color: cs.onGradientSubtle,
                             letterSpacing: 1.3,
                           ),
                         ),
@@ -267,7 +267,7 @@ class _Encabezado extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: cs.onSurface,
+                              color: cs.onGradientSurface,
                               letterSpacing: -0.6,
                             ),
                           ),
@@ -277,7 +277,7 @@ class _Encabezado extends StatelessWidget {
                           'meta ${Formatos.moneda(totalObjetivo!)}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: cs.onSurfaceVariant,
+                            color: cs.onGradientSurfaceVariant,
                           ),
                         ),
                       ],
@@ -317,13 +317,14 @@ class _MetaCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          gradient: cs.accentGradient,
+          gradient: cs.cardGradient,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
             color: meta.completada
                 ? cs.positivo.withValues(alpha: 0.4)
                 : cs.cardBorder,
           ),
+          boxShadow: cs.cardShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -742,13 +743,7 @@ class _FABPremium extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: cs.heroGradient,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
-        boxShadow: [
-          BoxShadow(
-            color: cs.primary.withValues(alpha: 0.5),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: cs.fabShadow,
       ),
       child: FloatingActionButton.extended(
         onPressed: onPressed,
