@@ -109,7 +109,7 @@ class _BolsillosScreenState extends State<BolsillosScreen> {
   }
 }
 
-// ── ENCABEZADO ───────────────────────────────────────────────────────────────
+// ── ENCABEZADO HERO ───────────────────────────────────────────────────────────
 
 class _EncabezadoBolsillos extends StatelessWidget {
   const _EncabezadoBolsillos({this.total});
@@ -122,32 +122,38 @@ class _EncabezadoBolsillos extends StatelessWidget {
       color: AppColors.base900,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.base,
-        MediaQuery.of(context).padding.top + AppSpacing.md,
+        MediaQuery.of(context).padding.top + AppSpacing.sm,
         AppSpacing.base,
         AppSpacing.base,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Badge título
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF065F46), Color(0xFF059669)],
-                  ),
+                  gradient: AppGradients.emerald,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.success.withValues(alpha: 0.40),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: const Icon(Icons.account_balance_wallet_rounded,
-                    color: Colors.white, size: 20),
+                    color: Colors.white, size: 17),
               ),
               const SizedBox(width: AppSpacing.md),
               const Text(
                 'Bolsillos',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                   letterSpacing: -0.5,
@@ -156,38 +162,99 @@ class _EncabezadoBolsillos extends StatelessWidget {
             ],
           ),
           if (total != null) ...[
-            const SizedBox(height: AppSpacing.base),
+            const SizedBox(height: AppSpacing.md),
+            // Hero card — Nequi inspired
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.base),
               decoration: BoxDecoration(
-                gradient: AppGradients.card,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.outlineDim),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'TOTAL EN BOLSILLOS',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textTertiary,
-                      letterSpacing: 1.2,
-                    ),
+                gradient: AppGradients.emerald,
+                borderRadius: BorderRadius.circular(AppRadius.xxl),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.success.withValues(alpha: 0.40),
+                    blurRadius: 28,
+                    offset: const Offset(0, 10),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    Formatos.moneda(total!),
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.8,
-                    ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.xxl),
+                child: Stack(
+                  children: [
+                    // Círculos decorativos de profundidad
+                    Positioned(
+                      top: -28,
+                      right: -20,
+                      child: Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.07),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -36,
+                      right: 30,
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.04),
+                        ),
+                      ),
+                    ),
+                    // Contenido
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'TOTAL EN BOLSILLOS',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white.withValues(alpha: 0.75),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              Formatos.moneda(total!),
+                              style: const TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -1.2,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'distribuido en tus bolsillos',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.70),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -220,18 +287,47 @@ class _BolsilloCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.surface300,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Center(
-                child: Text(
-                  bolsillo.emoji,
-                  style: const TextStyle(fontSize: 26),
-                ),
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (tieneObjetivo)
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: CircularProgressIndicator(
+                        value: bolsillo.progreso,
+                        strokeWidth: 3,
+                        backgroundColor: AppColors.outlineDim,
+                        valueColor: AlwaysStoppedAnimation(
+                          bolsillo.progreso >= 1.0
+                              ? AppColors.success
+                              : bolsillo.progreso >= 0.6
+                                  ? const Color(0xFF10B981)
+                                  : bolsillo.progreso >= 0.3
+                                      ? const Color(0xFFF59E0B)
+                                      : AppColors.primaryLight,
+                        ),
+                      ),
+                    ),
+                  Container(
+                    width: tieneObjetivo ? 44 : 52,
+                    height: tieneObjetivo ? 44 : 52,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface300,
+                      borderRadius: BorderRadius.circular(
+                          tieneObjetivo ? AppRadius.pill : AppRadius.md),
+                    ),
+                    child: Center(
+                      child: Text(
+                        bolsillo.emoji,
+                        style: TextStyle(fontSize: tieneObjetivo ? 22 : 26),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -251,25 +347,15 @@ class _BolsilloCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
-                  if (tieneObjetivo) ...[
+                  if (tieneObjetivo)
                     Text(
-                      '${(bolsillo.progreso * 100).toStringAsFixed(0)}% de ${Formatos.moneda(bolsillo.objetivo)}',
+                      '${(bolsillo.progreso * 100).toStringAsFixed(0)}% · meta ${Formatos.moneda(bolsillo.objetivo)}',
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textTertiary,
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                      child: LinearProgressIndicator(
-                        value: bolsillo.progreso,
-                        minHeight: 4,
-                        backgroundColor: AppColors.outlineDim,
-                        valueColor: const AlwaysStoppedAnimation(AppColors.success),
-                      ),
-                    ),
-                  ] else
+                    )
+                  else
                     const Text(
                       'Sin objetivo',
                       style: TextStyle(

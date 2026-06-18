@@ -122,7 +122,7 @@ class _MetasScreenState extends State<MetasScreen> {
   }
 }
 
-// ── ENCABEZADO ───────────────────────────────────────────────────────────────
+// ── ENCABEZADO HERO — Apple Fitness ring ─────────────────────────────────────
 
 class _Encabezado extends StatelessWidget {
   const _Encabezado({this.totalAhorrado, this.totalObjetivo});
@@ -132,7 +132,9 @@ class _Encabezado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progreso = (totalObjetivo != null && totalObjetivo! > 0)
+    final tieneObjetivo =
+        totalObjetivo != null && totalAhorrado != null && totalObjetivo! > 0;
+    final progreso = tieneObjetivo
         ? (totalAhorrado! / totalObjetivo!).clamp(0.0, 1.0)
         : 0.0;
 
@@ -140,31 +142,38 @@ class _Encabezado extends StatelessWidget {
       color: AppColors.base900,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.base,
-        MediaQuery.of(context).padding.top + AppSpacing.md,
+        MediaQuery.of(context).padding.top + AppSpacing.sm,
         AppSpacing.base,
         AppSpacing.base,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Badge título
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
-                  ),
+                  gradient: AppGradients.primary,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.40),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.flag_rounded, color: Colors.white, size: 20),
+                child: const Icon(Icons.rocket_launch_rounded,
+                    color: Colors.white, size: 17),
               ),
               const SizedBox(width: AppSpacing.md),
               const Text(
                 'Metas',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                   letterSpacing: -0.5,
@@ -172,71 +181,106 @@ class _Encabezado extends StatelessWidget {
               ),
             ],
           ),
-          if (totalAhorrado != null && totalObjetivo != null && totalObjetivo! > 0) ...[
-            const SizedBox(height: AppSpacing.base),
+          if (tieneObjetivo) ...[
+            const SizedBox(height: AppSpacing.lg),
+            // Hero ring — Apple Fitness style
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.base),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
                 gradient: AppGradients.card,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
+                borderRadius: BorderRadius.circular(AppRadius.xxl),
                 border: Border.all(color: AppColors.outlineDim),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'AHORRADO',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textTertiary,
-                              letterSpacing: 1.2,
+                  // Ring de progreso circular
+                  SizedBox(
+                    width: 96,
+                    height: 96,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 96,
+                          height: 96,
+                          child: CircularProgressIndicator(
+                            value: progreso,
+                            strokeWidth: 7,
+                            backgroundColor:
+                                AppColors.outlineDim,
+                            valueColor: AlwaysStoppedAnimation(
+                              progreso >= 1.0
+                                  ? AppColors.success
+                                  : AppColors.primaryLight,
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${(progreso * 100).round()}%',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textPrimary,
+                                letterSpacing: -0.8,
+                                height: 1.0,
+                              ),
+                            ),
+                            const Text(
+                              'logrado',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textTertiary,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xl),
+                  // Stats
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'AHORRADO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textTertiary,
+                            letterSpacing: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             Formatos.moneda(totalAhorrado!),
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
-                              letterSpacing: -0.5,
+                              letterSpacing: -0.6,
                             ),
                           ),
-                        ],
-                      ),
-                      Text(
-                        'de ${Formatos.moneda(totalObjetivo!)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textTertiary,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    child: LinearProgressIndicator(
-                      value: progreso,
-                      minHeight: 6,
-                      backgroundColor: AppColors.outlineDim,
-                      valueColor: const AlwaysStoppedAnimation(AppColors.primaryLight),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    '${(progreso * 100).toStringAsFixed(0)}% del objetivo total',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textTertiary,
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'meta ${Formatos.moneda(totalObjetivo!)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -285,15 +329,36 @@ class _MetaCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface300,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: Center(
-                    child: Text(meta.emoji, style: const TextStyle(fontSize: 24)),
+                // Ring circular Apple Fitness style
+                SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: CircularProgressIndicator(
+                          value: meta.progreso,
+                          strokeWidth: 3.5,
+                          backgroundColor: AppColors.outlineDim,
+                          valueColor: AlwaysStoppedAnimation(color),
+                        ),
+                      ),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: AppColors.surface300,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(meta.emoji,
+                              style: const TextStyle(fontSize: 22)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -357,16 +422,6 @@ class _MetaCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: LinearProgressIndicator(
-                value: meta.progreso,
-                minHeight: 6,
-                backgroundColor: AppColors.outlineDim,
-                valueColor: AlwaysStoppedAnimation(color),
-              ),
             ),
             if (meta.fechaObjetivo != null) ...[
               const SizedBox(height: AppSpacing.xs),

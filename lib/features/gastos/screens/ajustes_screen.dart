@@ -79,44 +79,171 @@ class _AjustesScreenState extends State<AjustesScreen> {
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.only(top: 4, bottom: 32),
               children: [
+                _headerPerfil(cs),
                 _seccion('General'),
-                _tileMoneda(cs),
-                _tileFormatoFecha(cs),
-                _tileTema(cs),
-                _tileReiniciarOnboarding(),
+                _buildGrupo(cs, [
+                  _tileMoneda(cs),
+                  _tileFormatoFecha(cs),
+                  _tileTema(cs),
+                  _tileReiniciarOnboarding(),
+                ]),
                 _seccion('Finanzas'),
-                _tilePresupuesto(cs),
-                _tileDiaInicio(cs),
-                _tileReiniciarDatos(cs),
+                _buildGrupo(cs, [
+                  _tilePresupuesto(cs),
+                  _tileDiaInicio(cs),
+                  _tileReiniciarDatos(cs),
+                ]),
                 _seccion('Notificaciones'),
-                _tileNotifActivas(),
-                _tileHoraRecordatorio(cs),
+                _buildGrupo(cs, [
+                  _tileNotifActivas(),
+                  _tileHoraRecordatorio(cs),
+                ]),
                 _seccion('Datos'),
-                _tileExportar(cs),
-                _tileImportar(cs),
-                _tileEspacio(cs),
+                _buildGrupo(cs, [
+                  _tileExportar(cs),
+                  _tileImportar(cs),
+                  _tileEspacio(cs),
+                ]),
                 _seccion('Información'),
-                _tileVersion(),
-                _tileEquipo(),
-                _tilePolitica(),
-                _tileTerminos(),
-                const SizedBox(height: 32),
+                _buildGrupo(cs, [
+                  _tileVersion(),
+                  _tileEquipo(),
+                  _tilePolitica(),
+                  _tileTerminos(),
+                ]),
               ],
             ),
     );
   }
 
+  Widget _headerPerfil(ColorScheme cs) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1B1630), Color(0xFF241B3E)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x1AFFFFFF)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF5B18D4), Color(0xFF8B35F7), Color(0xFFC084FC)],
+                stops: [0.0, 0.55, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF7B2FF7).withValues(alpha: 0.40),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.savings_rounded, color: Colors.white, size: 26),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'TuAhorro',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFFFFFFF),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Espacio: ${_formatearEspacio(_espacioBytes)}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7B2FF7).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFF7B2FF7).withValues(alpha: 0.30),
+              ),
+            ),
+            child: const Text(
+              'v1.0.0',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFA855F7),
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGrupo(ColorScheme cs, List<Widget> tiles) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.12),
+            ),
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < tiles.length; i++) ...[
+                tiles[i],
+                if (i < tiles.length - 1)
+                  Divider(
+                    height: 1,
+                    indent: 56,
+                    endIndent: 0,
+                    color: cs.outlineVariant.withValues(alpha: 0.10),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _seccion(String titulo) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 32, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 6),
       child: Text(
         titulo.toUpperCase(),
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
+          letterSpacing: 1.4,
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
@@ -540,14 +667,15 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
   }
 
-  Widget _iconContainer(IconData icon, ColorScheme cs) {
+  Widget _iconContainer(IconData icon, ColorScheme cs, {Color? color}) {
+    final c = color ?? cs.primary;
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(9),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+        color: c.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(icon, color: cs.primary, size: 22),
+      child: Icon(icon, color: c, size: 20),
     );
   }
 

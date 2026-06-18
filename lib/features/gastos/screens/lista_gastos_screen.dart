@@ -165,25 +165,49 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        toolbarHeight: 60,
+        title: Row(
           children: [
-            Text(
-              _saludoDelDia(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
+            // Logo badge premium
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                gradient: cs.heroGradient,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.primary.withValues(alpha: 0.30),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
+              child: const Icon(Icons.savings_rounded,
+                  color: Colors.white, size: 18),
             ),
-            Text(
-              'TuAhorro',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-              ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _saludoDelDia(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                    fontSize: 10,
+                  ),
+                ),
+                Text(
+                  'TuAhorro',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -218,13 +242,25 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: const Color(0xFF130F22),
           border: Border(
             top: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.15),
+              color: Colors.white.withValues(alpha: 0.07),
+              width: 0.5,
             ),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.30),
+              blurRadius: 24,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: NavigationBar(
+          backgroundColor: Colors.transparent,
+          indicatorColor: const Color(0xFF7B2FF7).withValues(alpha: 0.18),
+          height: 68,
           selectedIndex: 0,
           onDestinationSelected: (index) {
             switch (index) {
@@ -238,23 +274,23 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
           },
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
+              icon: Icon(Icons.home_outlined, size: 24),
+              selectedIcon: Icon(Icons.home_rounded, size: 24),
               label: 'Inicio',
             ),
             NavigationDestination(
-              icon: Icon(Icons.bar_chart_outlined),
-              selectedIcon: Icon(Icons.bar_chart_rounded),
+              icon: Icon(Icons.bar_chart_outlined, size: 24),
+              selectedIcon: Icon(Icons.bar_chart_rounded, size: 24),
               label: 'Estadísticas',
             ),
             NavigationDestination(
-              icon: Icon(Icons.wallet_outlined),
-              selectedIcon: Icon(Icons.wallet_rounded),
+              icon: Icon(Icons.account_balance_wallet_outlined, size: 24),
+              selectedIcon: Icon(Icons.account_balance_wallet_rounded, size: 24),
               label: 'Bolsillos',
             ),
             NavigationDestination(
-              icon: Icon(Icons.more_horiz_rounded),
-              selectedIcon: Icon(Icons.more_horiz_rounded),
+              icon: Icon(Icons.apps_outlined, size: 24),
+              selectedIcon: Icon(Icons.apps_rounded, size: 24),
               label: 'Más',
             ),
           ],
@@ -467,19 +503,39 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
         child: Row(
           children: [
-            Text(
-              'Movimientos',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.1,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'MOVIMIENTOS',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.4,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _filtro.estaActivo ? 'Resultados filtrados' : 'Todos los registros',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
+                gradient: LinearGradient(colors: [
+                  cs.primary.withValues(alpha: 0.18),
+                  cs.primary.withValues(alpha: 0.10),
+                ]),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: cs.primary.withValues(alpha: 0.25)),
               ),
               child: Text(
                 '${_gastosFiltrados.length}',

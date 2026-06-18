@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+export 'app_design_system.dart';
+
 class AppTheme {
   AppTheme._();
 
   static const _fontFamily = 'Roboto';
 
-  static const _seedColor = Color(0xFF7C3AED);
+  // Premium Royal seed — deep violet #7B2FF7
+  static const _seedColor = Color(0xFF7B2FF7);
 
   static ThemeData light() => _build(Brightness.light);
-  static ThemeData dark() => _build(Brightness.dark);
+  static ThemeData dark()  => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: _seedColor,
       brightness: brightness,
-      surface: isDark ? const Color(0xFF0D0D12) : const Color(0xFFF7F6FB),
-      surfaceContainerLowest: isDark ? const Color(0xFF16161E) : Colors.white,
-      surfaceContainerLow: isDark ? const Color(0xFF1C1C27) : const Color(0xFFF1F0F7),
-      surfaceContainer: isDark ? const Color(0xFF222230) : const Color(0xFFEBEAF2),
-      surfaceContainerHigh: isDark ? const Color(0xFF2A2A3A) : const Color(0xFFE4E3EC),
-      surfaceContainerHighest: isDark ? const Color(0xFF323244) : const Color(0xFFDBDAE5),
+      // Premium Royal dark surfaces
+      surface:                  isDark ? const Color(0xFF0F0B1D) : const Color(0xFFF7F6FC),
+      surfaceContainerLowest:   isDark ? const Color(0xFF1B1630) : Colors.white,
+      surfaceContainerLow:      isDark ? const Color(0xFF241B3E) : const Color(0xFFF1F0F8),
+      surfaceContainer:         isDark ? const Color(0xFF2D2250) : const Color(0xFFEBEAF4),
+      surfaceContainerHigh:     isDark ? const Color(0xFF362A5E) : const Color(0xFFE4E3EF),
+      surfaceContainerHighest:  isDark ? const Color(0xFF3F316A) : const Color(0xFFDBDAE8),
     );
 
     final textTheme = _textTheme(colorScheme);
@@ -40,7 +44,12 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
-        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light.copyWith(
+                statusBarColor: Colors.transparent,
+                systemNavigationBarColor: const Color(0xFF0F0B1D),
+              )
+            : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           fontSize: 20,
@@ -49,12 +58,10 @@ class AppTheme {
 
       cardTheme: CardThemeData(
         elevation: 0,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: colorScheme.surfaceContainerLowest,
-        shadowColor: colorScheme.onSurface.withValues(alpha: 0.08),
+        shadowColor: Colors.black.withValues(alpha: 0.18),
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -75,7 +82,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+          borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.25)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -89,13 +96,13 @@ class AppTheme {
 
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.25)),
       ),
 
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         elevation: 0,
-        backgroundColor: colorScheme.surfaceContainerLowest,
+        backgroundColor: isDark ? const Color(0xFF1B1630) : Colors.white,
         surfaceTintColor: Colors.transparent,
       ),
 
@@ -103,7 +110,7 @@ class AppTheme {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        backgroundColor: colorScheme.surfaceContainerLowest,
+        backgroundColor: isDark ? const Color(0xFF1B1630) : Colors.white,
         showDragHandle: true,
         elevation: 0,
       ),
@@ -114,29 +121,23 @@ class AppTheme {
       ),
 
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+        color: colorScheme.outlineVariant.withValues(alpha: 0.15),
         space: 1,
         thickness: 1,
-      ),
-
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: colorScheme.surfaceContainerLowest,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurfaceVariant,
-        elevation: 0,
-        selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 12),
       ),
 
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF12121A) : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF130F22) : Colors.white,
         surfaceTintColor: Colors.transparent,
-        indicatorColor: colorScheme.primary.withValues(alpha: 0.12),
+        indicatorColor: const Color(0xFF7B2FF7).withValues(alpha: 0.15),
         labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+          TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
         ),
       ),
 
@@ -158,25 +159,26 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: isDark ? const Color(0xFF241B3E) : const Color(0xFF1B1630),
       ),
     );
   }
 
   static TextTheme _textTheme(ColorScheme cs) {
     return TextTheme(
-      displayLarge: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: cs.onSurface, letterSpacing: -0.8),
+      displayLarge:  TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: cs.onSurface, letterSpacing: -0.8),
       displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: cs.onSurface, letterSpacing: -0.5),
       headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: cs.onSurface, letterSpacing: -0.3),
-      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: cs.onSurface),
-      titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurface),
-      titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface),
-      titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface),
-      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: cs.onSurface),
-      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: cs.onSurface),
-      bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: cs.onSurfaceVariant),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface),
-      labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant),
-      labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant, letterSpacing: 0.3),
+      headlineMedium:TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: cs.onSurface),
+      titleLarge:    TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurface),
+      titleMedium:   TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface),
+      titleSmall:    TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface),
+      bodyLarge:     TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: cs.onSurface),
+      bodyMedium:    TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: cs.onSurface),
+      bodySmall:     TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: cs.onSurfaceVariant),
+      labelLarge:    TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface),
+      labelMedium:   TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant),
+      labelSmall:    TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant, letterSpacing: 0.3),
     );
   }
 }

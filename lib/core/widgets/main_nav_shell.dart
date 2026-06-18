@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../features/ajustes/screens/ajustes_screen.dart';
 import '../../features/bolsillos/data/bolsillo_repository.dart';
 import '../../features/bolsillos/screens/bolsillos_screen.dart';
 import '../../features/gastos/data/gasto_repository.dart';
+import '../../features/gastos/screens/ajustes_screen.dart';
 import '../../features/gastos/screens/lista_gastos_screen.dart';
 import '../../features/metas/data/meta_repository.dart';
 import '../../features/metas/screens/metas_screen.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_design_system.dart';
 
 class MainNavShell extends StatefulWidget {
   const MainNavShell({super.key, required this.repository});
@@ -40,7 +40,10 @@ class _MainNavShellState extends State<MainNavShell> {
           ListaGastosScreen(repository: widget.repository),
           BolsillosScreen(repository: _bolsillos),
           MetasScreen(repository: _metas),
-          AjustesScreen(repository: widget.repository),
+          AjustesScreen(
+            repository: widget.repository,
+            onSettingsChanged: (_) {},
+          ),
         ],
       ),
       bottomNavigationBar: _NavBar(
@@ -63,37 +66,38 @@ class _NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface100,
+        color: const Color(0xFF130F22),
         border: const Border(
-          top: BorderSide(color: AppColors.outlineDim, width: 1),
+          top: BorderSide(color: AppColors.outlineDim, width: 0.5),
         ),
+        boxShadow: AppShadows.navBar,
       ),
       child: NavigationBar(
         backgroundColor: Colors.transparent,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.18),
         selectedIndex: tabActual,
         onDestinationSelected: onCambio,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        height: 64,
+        height: 68,
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+            icon:         Icon(Icons.home_outlined,                   size: 24),
+            selectedIcon: Icon(Icons.home_rounded,                    size: 24),
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+            icon:         Icon(Icons.account_balance_wallet_outlined,  size: 24),
+            selectedIcon: Icon(Icons.account_balance_wallet_rounded,   size: 24),
             label: 'Bolsillos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.flag_outlined),
-            selectedIcon: Icon(Icons.flag_rounded),
+            icon:         Icon(Icons.rocket_launch_outlined, size: 24),
+            selectedIcon: Icon(Icons.rocket_launch_rounded,  size: 24),
             label: 'Metas',
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded),
+            icon:         Icon(Icons.tune_outlined,  size: 24),
+            selectedIcon: Icon(Icons.tune_rounded,   size: 24),
             label: 'Ajustes',
           ),
         ],

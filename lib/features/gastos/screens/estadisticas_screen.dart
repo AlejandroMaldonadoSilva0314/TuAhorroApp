@@ -73,7 +73,8 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
 
   String get _nombreMes {
     const nombres = [
-      '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      '',
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
     ];
     return '${nombres[_mes]} $_anio';
@@ -81,114 +82,283 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final stats = _calculator.calcular(_gastos, _anio, _mes);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Estadísticas')),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.zero,
               children: [
-                _buildSelectorMes(colorScheme),
-                const SizedBox(height: 16),
-                _buildTarjetasResumen(stats, colorScheme),
-                const SizedBox(height: 16),
-                if (stats.categoriaMayorGastoId != null) ...[
-                  _buildMayorCategoria(stats, colorScheme),
-                  const SizedBox(height: 12),
-                ],
-                if (stats.top3Categorias.isNotEmpty) ...[
-                  _buildTop3(stats, colorScheme),
-                  const SizedBox(height: 12),
-                ],
-                if (stats.gastosPorCategoria.isNotEmpty)
-                  _buildGrafico(stats, colorScheme),
+                // Header con gradiente — estilo Revolut
+                _HeaderResumen(
+                  stats: stats,
+                  nombreMes: _nombreMes,
+                  onAnterior: _mesAnterior,
+                  onSiguiente: _mesSiguiente,
+                  esMesActual: _anio == DateTime.now().year &&
+                      _mes == DateTime.now().month,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    children: [
+                      if (stats.categoriaMayorGastoId != null) ...[
+                        _TarjetaMayorCategoria(
+                          nombre: _nombreCategoria(stats.categoriaMayorGastoId!),
+                          monto: stats.montoMayorCategoria,
+                          cs: cs,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (stats.top3Categorias.isNotEmpty) ...[
+                        _TarjetaTop3(
+                          top3: stats.top3Categorias,
+                          nombreCategoria: _nombreCategoria,
+                          cs: cs,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (stats.gastosPorCategoria.isNotEmpty)
+                        _GraficoBarras(
+                          datos: stats.gastosPorCategoria,
+                          nombreCategoria: _nombreCategoria,
+                          cs: cs,
+                        ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
               ],
             ),
     );
   }
+}
 
-  Widget _buildSelectorMes(ColorScheme cs) {
-    final ahora = DateTime.now();
-    final esActual = _anio == ahora.year && _mes == ahora.month;
+// ── HEADER GRADIENTE ─────────────────────────────────────────────────────────
 
+class _HeaderResumen extends StatelessWidget {
+  const _HeaderResumen({
+    required this.stats,
+    required this.nombreMes,
+    required this.onAnterior,
+    required this.onSiguiente,
+    required this.esMesActual,
+  });
+
+  final EstadisticasMensuales stats;
+  final String nombreMes;
+  final VoidCallback onAnterior;
+  final VoidCallback onSiguiente;
+  final bool esMesActual;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: cs.cardSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.cardBorder),
+        gradient: AppGradients.hero,
+        boxShadow: AppShadows.hero,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.base, AppSpacing.base,
+              AppSpacing.base, AppSpacing.xl),
+          child: Column(
+            children: [
+              // Top bar — título + selector mes
+              Row(
+                children: [
+                  // Botón atrás
+                  Builder(
+                    builder: (ctx) => GestureDetector(
+                      onTap: () => Navigator.of(ctx).maybePop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Estadísticas',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const Spacer(),
+                  const SizedBox(width: 36), // balance
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              // Selector de mes — pill premium
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _NavBtn(icon: Icons.chevron_left_rounded, onTap: onAnterior),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      nombreMes,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    _NavBtn(
+                      icon: Icons.chevron_right_rounded,
+                      onTap: esMesActual ? null : onSiguiente,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              // Tres métricas principales
+              Row(
+                children: [
+                  _MetricaBlanca(
+                      label: 'Gastos',
+                      valor: Formatos.moneda(stats.totalGastos)),
+                  _Divisor(),
+                  _MetricaBlanca(
+                      label: 'Ingresos',
+                      valor: Formatos.moneda(stats.totalIngresos)),
+                  _Divisor(),
+                  _MetricaBlanca(
+                      label: 'Ahorro',
+                      valor: Formatos.moneda(stats.ahorroNeto),
+                      esNegativo: stats.ahorroNeto < 0),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavBtn extends StatelessWidget {
+  const _NavBtn({required this.icon, this.onTap});
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: onTap == null ? 0.06 : 0.15),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        child: Icon(icon,
+            color: Colors.white.withValues(alpha: onTap == null ? 0.3 : 1.0),
+            size: 20),
+      ),
+    );
+  }
+}
+
+class _MetricaBlanca extends StatelessWidget {
+  const _MetricaBlanca(
+      {required this.label, required this.valor, this.esNegativo = false});
+  final String label;
+  final String valor;
+  final bool esNegativo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
         children: [
-          IconButton(
-            onPressed: _mesAnterior,
-            icon: const Icon(Icons.chevron_left_rounded),
-          ),
           Text(
-            _nombreMes,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.white.withValues(alpha: 0.70),
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
           ),
-          IconButton(
-            onPressed: esActual ? null : _mesSiguiente,
-            icon: const Icon(Icons.chevron_right_rounded),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              valor,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: esNegativo
+                    ? const Color(0xFFFFB86C)
+                    : Colors.white,
+                letterSpacing: -0.4,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTarjetasResumen(EstadisticasMensuales stats, ColorScheme cs) {
-    return Row(
-      children: [
-        Expanded(
-          child: _TarjetaMetrica(
-            titulo: 'Gastos',
-            valor: Formatos.moneda(stats.totalGastos),
-            color: cs.negativo,
-            icono: Icons.arrow_downward_rounded,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _TarjetaMetrica(
-            titulo: 'Ingresos',
-            valor: Formatos.moneda(stats.totalIngresos),
-            color: cs.positivo,
-            icono: Icons.arrow_upward_rounded,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _TarjetaMetrica(
-            titulo: 'Ahorro',
-            valor: Formatos.moneda(stats.ahorroNeto),
-            color: stats.ahorroNeto >= 0 ? cs.ahorro : cs.alerta,
-            icono: stats.ahorroNeto >= 0 ? Icons.savings_rounded : Icons.warning_rounded,
-          ),
-        ),
-      ],
+class _Divisor extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 36,
+      color: Colors.white.withValues(alpha: 0.20),
     );
   }
+}
 
-  Widget _buildMayorCategoria(EstadisticasMensuales stats, ColorScheme cs) {
+// ── MAYOR CATEGORÍA ───────────────────────────────────────────────────────────
+
+class _TarjetaMayorCategoria extends StatelessWidget {
+  const _TarjetaMayorCategoria(
+      {required this.nombre, required this.monto, required this.cs});
+  final String nombre;
+  final double monto;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         color: cs.cardSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: cs.error.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
+              color: cs.error.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Icon(Icons.trending_up_rounded, color: cs.error, size: 22),
           ),
@@ -197,44 +367,72 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mayor gasto', style: TextStyle(
-                  fontSize: 12, color: cs.onSurfaceVariant, fontWeight: FontWeight.w500)),
+                Text('Mayor gasto del mes',
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3)),
                 const SizedBox(height: 2),
-                Text(_nombreCategoria(stats.categoriaMayorGastoId!),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                Text(nombre,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 15)),
               ],
             ),
           ),
           Text(
-            Formatos.moneda(stats.montoMayorCategoria),
-            style: TextStyle(fontWeight: FontWeight.w700, color: cs.error, fontSize: 16),
+            Formatos.moneda(monto),
+            style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: cs.error,
+                fontSize: 15),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTop3(EstadisticasMensuales stats, ColorScheme cs) {
+// ── TOP 3 ─────────────────────────────────────────────────────────────────────
+
+class _TarjetaTop3 extends StatelessWidget {
+  const _TarjetaTop3(
+      {required this.top3,
+      required this.nombreCategoria,
+      required this.cs});
+  final List<MapEntry<String, double>> top3;
+  final String Function(String) nombreCategoria;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    const colores = [
+      Color(0xFF7B2FF7),
+      Color(0xFFA855F7),
+      Color(0xFFC084FC),
+    ];
+
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         color: cs.cardSurface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Top categorías',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: cs.onSurface),
-          ),
-          const SizedBox(height: 14),
-          ...stats.top3Categorias.asMap().entries.map((entry) {
+          Text('Top categorías',
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: cs.onSurface)),
+          const SizedBox(height: AppSpacing.md),
+          ...top3.asMap().entries.map((entry) {
             final i = entry.key;
             final cat = entry.value;
-            final colores = [cs.primary, cs.ahorro, cs.alerta];
-
+            final color = colores[i % 3];
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
@@ -243,92 +441,35 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: colores[i % 3].withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        colors: [color, color.withValues(alpha: 0.6)],
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Center(
                       child: Text(
                         '${i + 1}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: colores[i % 3],
-                        ),
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(child: Text(_nombreCategoria(cat.key),
-                      style: const TextStyle(fontSize: 14))),
+                  Expanded(
+                    child: Text(nombreCategoria(cat.key),
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: cs.onSurface,
+                            fontWeight: FontWeight.w500)),
+                  ),
                   Text(
                     Formatos.moneda(cat.value),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGrafico(EstadisticasMensuales stats, ColorScheme cs) {
-    final maxMonto = stats.gastosPorCategoria.values
-        .fold(0.0, (a, b) => a > b ? a : b);
-    if (maxMonto == 0) return const SizedBox.shrink();
-
-    final colores = cs.chartColors;
-
-    final entradas = stats.gastosPorCategoria.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cs.cardSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: cs.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Gastos por categoría',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: cs.onSurface),
-          ),
-          const SizedBox(height: 16),
-          ...entradas.asMap().entries.map((entry) {
-            final i = entry.key;
-            final e = entry.value;
-            final porcentaje = e.value / maxMonto;
-            final color = colores[i % colores.length];
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_nombreCategoria(e.key),
-                          style: const TextStyle(fontSize: 13)),
-                      Text(
-                        Formatos.moneda(e.value),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: porcentaje,
-                      minHeight: 10,
-                      backgroundColor: color.withValues(alpha: 0.1),
-                      valueColor: AlwaysStoppedAnimation(color),
-                    ),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: color),
                   ),
                 ],
               ),
@@ -340,57 +481,114 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
   }
 }
 
-class _TarjetaMetrica extends StatelessWidget {
-  const _TarjetaMetrica({
-    required this.titulo,
-    required this.valor,
-    required this.color,
-    required this.icono,
-  });
+// ── GRÁFICO DE BARRAS ─────────────────────────────────────────────────────────
 
-  final String titulo;
-  final String valor;
-  final Color color;
-  final IconData icono;
+class _GraficoBarras extends StatelessWidget {
+  const _GraficoBarras(
+      {required this.datos,
+      required this.nombreCategoria,
+      required this.cs});
+
+  final Map<String, double> datos;
+  final String Function(String) nombreCategoria;
+  final ColorScheme cs;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final maxMonto = datos.values.fold(0.0, (a, b) => a > b ? a : b);
+    if (maxMonto == 0) return const SizedBox.shrink();
+
+    final entradas = datos.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final colores = cs.chartColors;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         color: cs.cardSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icono, color: color, size: 20),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            titulo,
-            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              valor,
+          Text('Gastos por categoría',
               style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-                color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: cs.onSurface)),
+          const SizedBox(height: AppSpacing.base),
+          ...entradas.asMap().entries.map((entry) {
+            final i = entry.key;
+            final e = entry.value;
+            final porcentaje = e.value / maxMonto;
+            final color = colores[i % colores.length];
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(nombreCategoria(e.key),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: cs.onSurface,
+                                fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        Formatos.moneda(e.value),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: color),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  // Barra con gradiente
+                  Stack(
+                    children: [
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: porcentaje,
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [color, color.withValues(alpha: 0.6)],
+                            ),
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.30),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );

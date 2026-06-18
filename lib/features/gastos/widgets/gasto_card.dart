@@ -22,66 +22,118 @@ class GastoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     final cat = _categoria;
     final esIngreso = gasto.tipo == TipoTransaccion.ingreso;
-    final montoColor = esIngreso ? colorScheme.positivo : colorScheme.error;
+    final montoColor = esIngreso ? cs.positivo : cs.error;
     final iconBg = esIngreso
-        ? colorScheme.positivo.withValues(alpha: 0.15)
-        : colorScheme.error.withValues(alpha: 0.12);
+        ? cs.positivo.withValues(alpha: 0.12)
+        : cs.error.withValues(alpha: 0.10);
 
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onLongPress: onEliminar,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  cat?.icono ?? Icons.category_outlined,
-                  color: montoColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          onLongPress: onEliminar,
+          child: Container(
+            decoration: BoxDecoration(
+              color: cs.cardSurface,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(color: cs.cardBorder),
+              boxShadow: AppShadows.card,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              child: IntrinsicHeight(
+                child: Row(
                   children: [
-                    Text(
-                      gasto.titulo,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    // Borde lateral de color semántico
+                    Container(
+                      width: 3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            montoColor,
+                            montoColor.withValues(alpha: 0.4),
+                          ],
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${cat?.nombre ?? gasto.categoriaId} · ${Formatos.fecha(gasto.fecha)}',
-                      style: textTheme.bodySmall,
+                    // Contenido
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            // Ícono de categoría
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: iconBg,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.md),
+                              ),
+                              child: Icon(
+                                cat?.icono ?? Icons.category_outlined,
+                                color: montoColor,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            // Título y categoría
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    gasto.titulo,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.1,
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '${cat?.nombre ?? gasto.categoriaId} · ${Formatos.fecha(gasto.fecha)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Monto
+                            Text(
+                              '${esIngreso ? '+' : '−'}${Formatos.moneda(gasto.monto)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: montoColor,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                '${esIngreso ? '+' : '-'}${Formatos.moneda(gasto.monto)}',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: montoColor,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
