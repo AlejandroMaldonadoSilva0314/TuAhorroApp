@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/formatos.dart';
 
 class DashboardResumen extends StatelessWidget {
@@ -54,8 +55,8 @@ class DashboardResumen extends StatelessWidget {
                   label: 'Ingresos',
                   monto: ingresos,
                   icono: Icons.arrow_upward_rounded,
-                  color: Colors.green.shade700,
-                  colorFondo: Colors.green.shade50,
+                  color: colorScheme.primary,
+                  colorFondo: colorScheme.primaryContainer.withValues(alpha: 0.4),
                 ),
               ),
               const SizedBox(width: 12),
@@ -86,15 +87,26 @@ class _TarjetaSaldo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final appTheme = ThemeScope.of(context);
     final esPositivo = saldo >= 0;
-    final color = esPositivo ? Colors.green.shade700 : colorScheme.error;
+    final color = esPositivo ? colorScheme.primary : colorScheme.error;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        gradient: LinearGradient(
+          colors: [
+            appTheme.gradientColors[0].withValues(alpha: 0.15),
+            appTheme.gradientColors[1].withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: appTheme.gradientColors[1].withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,13 +114,13 @@ class _TarjetaSaldo extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.account_balance_wallet_outlined,
-                  size: 18, color: colorScheme.onPrimaryContainer),
+                  size: 18, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
                 'Saldo disponible',
                 style: TextStyle(
                   fontSize: 13,
-                  color: colorScheme.onPrimaryContainer,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -143,18 +155,13 @@ class _TarjetaPlataHoy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final appTheme = ThemeScope.of(context);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.tertiary,
-            colorScheme.tertiary.withValues(alpha: 0.85),
-          ],
-        ),
+        gradient: appTheme.gradientCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -285,7 +292,7 @@ class _TarjetaPresupuesto extends StatelessWidget {
                 _MiniIndicador(
                   label: 'Disponible',
                   monto: disponible,
-                  color: Colors.green.shade700,
+                  color: colorScheme.primary,
                 ),
               ],
             ),

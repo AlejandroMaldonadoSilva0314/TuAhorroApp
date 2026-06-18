@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/formatos.dart';
+import '../../ajustes/screens/ajustes_screen.dart';
 import '../data/gasto_repository.dart';
 import '../logic/plata_para_hoy.dart';
 import '../logic/presupuesto_semanal.dart';
@@ -91,12 +93,17 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final appTheme = ThemeScope.of(context);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(gradient: appTheme.gradient),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -116,6 +123,13 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: _cargarGastos,
             tooltip: 'Actualizar',
+          ),
+          IconButton(
+            icon: const Icon(Icons.palette_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AjustesScreen()),
+            ),
+            tooltip: 'Personalizar',
           ),
         ],
       ),

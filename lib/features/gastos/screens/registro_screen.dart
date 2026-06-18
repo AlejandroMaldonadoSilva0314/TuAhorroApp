@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/theme_scope.dart';
 import '../models/gasto.dart';
 
 class RegistroScreen extends StatefulWidget {
@@ -50,13 +51,17 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final appTheme = ThemeScope.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nueva transacción'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(gradient: appTheme.gradient),
+        ),
       ),
       body: Form(
         key: _formKey,
