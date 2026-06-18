@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/formatos.dart';
 import '../../ajustes/screens/ajustes_screen.dart';
+import '../../notificaciones/data/notificacion_repository_local.dart';
+import '../../notificaciones/logic/notificacion_service.dart';
+import '../../notificaciones/screens/notificaciones_screen.dart';
+import '../../notificaciones/widgets/notificacion_badge.dart';
 import '../data/gasto_repository.dart';
 import '../logic/plata_para_hoy.dart';
 import '../logic/presupuesto_semanal.dart';
@@ -25,6 +29,8 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   double _presupuesto = 0;
   bool _cargando = true;
   String? _error;
+  final _notifRepo = NotificacionRepositoryLocal();
+  int _sinLeer = 0;
 
   @override
   void initState() {
@@ -48,6 +54,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
           _presupuesto = resultados[1] as double;
           _cargando = false;
         });
+        _evaluarNotificaciones();
       }
     } catch (e) {
       if (mounted) {
@@ -57,6 +64,25 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         });
       }
     }
+  }
+
+  Future<void> _evaluarNotificaciones() async {
+    await NotificacionService(
+      gastoRepository: widget.repository,
+      notificacionRepository: _notifRepo,
+    ).evaluarYGenerarNotificaciones();
+    final lista = await _notifRepo.obtenerNotificaciones();
+    if (mounted) setState(() => _sinLeer = lista.where((n) => !n.leida).length);
+  }
+
+  Future<void> _abrirNotificaciones() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NotificacionesScreen(repository: _notifRepo),
+      ),
+    );
+    final lista = await _notifRepo.obtenerNotificaciones();
+    if (mounted) setState(() => _sinLeer = lista.where((n) => !n.leida).length);
   }
 
   Future<void> _eliminarGasto(String id) async {
@@ -124,6 +150,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             onPressed: _cargarGastos,
             tooltip: 'Actualizar',
           ),
+          NotificacionBadge(sinLeer: _sinLeer, onTap: _abrirNotificaciones),
           IconButton(
             icon: const Icon(Icons.palette_outlined),
             onPressed: () => Navigator.of(context).push(

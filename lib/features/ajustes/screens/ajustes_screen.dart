@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_themes.dart';
 import '../../../core/theme/theme_scope.dart';
+import '../../notificaciones/widgets/notificaciones_ajustes_section.dart';
 
 class AjustesScreen extends StatefulWidget {
   const AjustesScreen({super.key});
@@ -78,6 +79,11 @@ class _AjustesScreenState extends State<AjustesScreen> {
           ),
           const SizedBox(height: 36),
           _ThemePreview(appTheme: appTheme),
+          const SizedBox(height: 36),
+          const Divider(),
+          const SizedBox(height: 24),
+          const NotificacionesAjustesSection(),
+          const SizedBox(height: 16),
         ],
       ),
     );
