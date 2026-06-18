@@ -1,0 +1,691 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatos.dart';
+import '../data/bolsillo_repository.dart';
+import '../models/bolsillo.dart';
+
+const _emojis = ['💰', '🏠', '✈️', '🎓', '🛒', '💊', '🎮', '🚗', '🍔', '📱', '👕', '🐾'];
+
+class BolsillosScreen extends StatefulWidget {
+  const BolsillosScreen({super.key, required this.repository});
+
+  final BolsilloRepository repository;
+
+  @override
+  State<BolsillosScreen> createState() => _BolsillosScreenState();
+}
+
+class _BolsillosScreenState extends State<BolsillosScreen> {
+  List<Bolsillo> _bolsillos = [];
+  bool _cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargar();
+  }
+
+  Future<void> _cargar() async {
+    setState(() => _cargando = true);
+    final lista = await widget.repository.obtener();
+    if (mounted) setState(() { _bolsillos = lista; _cargando = false; });
+  }
+
+  double get _totalBolsillos => _bolsillos.fold(0.0, (s, b) => s + b.saldo);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.base900,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: _EncabezadoBolsillos(total: _cargando ? null : _totalBolsillos),
+          ),
+          if (_cargando)
+            const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  strokeWidth: 2.5,
+                ),
+              ),
+            )
+          else if (_bolsillos.isEmpty)
+            const SliverFillRemaining(child: _EstadoVacio())
+          else ...[
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base, 0, AppSpacing.base, AppSpacing.sm,
+              ),
+              sliver: SliverList.builder(
+                itemCount: _bolsillos.length,
+                itemBuilder: (ctx, i) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _BolsilloCard(
+                    bolsillo: _bolsillos[i],
+                    onTap: () => _abrirGestion(_bolsillos[i]),
+                  ),
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 96)),
+          ],
+        ],
+      ),
+      floatingActionButton: _FABPremium(onPressed: _abrirCrear),
+    );
+  }
+
+  Future<void> _abrirGestion(Bolsillo bolsillo) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _DialogGestion(
+        bolsillo: bolsillo,
+        onActualizar: (b) async {
+          await widget.repository.guardar(b);
+          await _cargar();
+        },
+        onEliminar: () async {
+          await widget.repository.eliminar(bolsillo.id);
+          await _cargar();
+        },
+      ),
+    );
+  }
+
+  Future<void> _abrirCrear() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _DialogCrear(
+        onCrear: (b) async {
+          await widget.repository.guardar(b);
+          await _cargar();
+        },
+      ),
+    );
+  }
+}
+
+// ── ENCABEZADO ───────────────────────────────────────────────────────────────
+
+class _EncabezadoBolsillos extends StatelessWidget {
+  const _EncabezadoBolsillos({this.total});
+
+  final double? total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.base900,
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        MediaQuery.of(context).padding.top + AppSpacing.md,
+        AppSpacing.base,
+        AppSpacing.base,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF065F46), Color(0xFF059669)],
+                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: const Icon(Icons.account_balance_wallet_rounded,
+                    color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              const Text(
+                'Bolsillos',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+          if (total != null) ...[
+            const SizedBox(height: AppSpacing.base),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.base),
+              decoration: BoxDecoration(
+                gradient: AppGradients.card,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.outlineDim),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'TOTAL EN BOLSILLOS',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textTertiary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    Formatos.moneda(total!),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── CARD ─────────────────────────────────────────────────────────────────────
+
+class _BolsilloCard extends StatelessWidget {
+  const _BolsilloCard({required this.bolsillo, required this.onTap});
+
+  final Bolsillo bolsillo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tieneObjetivo = bolsillo.objetivo > 0;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        decoration: BoxDecoration(
+          gradient: AppGradients.card,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.outlineDim),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.surface300,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Center(
+                child: Text(
+                  bolsillo.emoji,
+                  style: const TextStyle(fontSize: 26),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    bolsillo.nombre,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  if (tieneObjetivo) ...[
+                    Text(
+                      '${(bolsillo.progreso * 100).toStringAsFixed(0)}% de ${Formatos.moneda(bolsillo.objetivo)}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      child: LinearProgressIndicator(
+                        value: bolsillo.progreso,
+                        minHeight: 4,
+                        backgroundColor: AppColors.outlineDim,
+                        valueColor: const AlwaysStoppedAnimation(AppColors.success),
+                      ),
+                    ),
+                  ] else
+                    const Text(
+                      'Sin objetivo',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  Formatos.moneda(bolsillo.saldo),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: AppColors.textTertiary,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── DIÁLOGO: GESTIÓN ─────────────────────────────────────────────────────────
+
+class _DialogGestion extends StatefulWidget {
+  const _DialogGestion({
+    required this.bolsillo,
+    required this.onActualizar,
+    required this.onEliminar,
+  });
+
+  final Bolsillo bolsillo;
+  final Future<void> Function(Bolsillo) onActualizar;
+  final Future<void> Function() onEliminar;
+
+  @override
+  State<_DialogGestion> createState() => _DialogGestionState();
+}
+
+class _DialogGestionState extends State<_DialogGestion> {
+  final _ctrl = TextEditingController();
+  bool _agregar = true;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _guardar() async {
+    final monto = double.tryParse(_ctrl.text.replaceAll(',', '.'));
+    if (monto == null || monto <= 0) return;
+    final nuevoSaldo = _agregar
+        ? widget.bolsillo.saldo + monto
+        : (widget.bolsillo.saldo - monto).clamp(0.0, double.infinity);
+    await widget.onActualizar(widget.bolsillo.copyWith(saldo: nuevoSaldo));
+    if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _eliminar() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar bolsillo'),
+        content: Text('¿Eliminar "${widget.bolsillo.nombre}"? El saldo se perderá.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await widget.onEliminar();
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Text(widget.bolsillo.emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              widget.bolsillo.nombre,
+              style: const TextStyle(color: AppColors.textPrimary),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Saldo actual: ${Formatos.moneda(widget.bolsillo.saldo)}',
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.base),
+          // Toggle agregar/retirar
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surface200,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Row(
+              children: [
+                _ToggleBtn(
+                  label: 'Agregar',
+                  activo: _agregar,
+                  color: AppColors.success,
+                  onTap: () => setState(() => _agregar = true),
+                ),
+                _ToggleBtn(
+                  label: 'Retirar',
+                  activo: !_agregar,
+                  color: AppColors.error,
+                  onTap: () => setState(() => _agregar = false),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: _ctrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+            autofocus: true,
+            decoration: const InputDecoration(
+              prefixText: '\$ ',
+              hintText: '0',
+              labelText: 'Monto',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _eliminar,
+          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+          child: const Text('Eliminar'),
+        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        FilledButton(onPressed: _guardar, child: const Text('Guardar')),
+      ],
+    );
+  }
+}
+
+// ── DIÁLOGO: CREAR ───────────────────────────────────────────────────────────
+
+class _DialogCrear extends StatefulWidget {
+  const _DialogCrear({required this.onCrear});
+
+  final Future<void> Function(Bolsillo) onCrear;
+
+  @override
+  State<_DialogCrear> createState() => _DialogCrearState();
+}
+
+class _DialogCrearState extends State<_DialogCrear> {
+  final _nombreCtrl = TextEditingController();
+  final _objetivoCtrl = TextEditingController();
+  String _emoji = '💰';
+
+  @override
+  void dispose() {
+    _nombreCtrl.dispose();
+    _objetivoCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _crear() async {
+    final nombre = _nombreCtrl.text.trim();
+    if (nombre.isEmpty) return;
+    final objetivo = double.tryParse(_objetivoCtrl.text.replaceAll(',', '.')) ?? 0;
+    final bolsillo = Bolsillo(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      nombre: nombre,
+      emoji: _emoji,
+      objetivo: objetivo,
+      saldo: 0,
+    );
+    await widget.onCrear(bolsillo);
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Nuevo bolsillo'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nombreCtrl,
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(labelText: 'Nombre', hintText: 'Ej: Vacaciones'),
+            ),
+            const SizedBox(height: AppSpacing.base),
+            const Text(
+              'ÍCONO',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textTertiary,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _emojis.map((e) {
+                final sel = e == _emoji;
+                return GestureDetector(
+                  onTap: () => setState(() => _emoji = e),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: sel ? AppColors.primary.withValues(alpha: 0.2) : AppColors.surface200,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      border: sel ? Border.all(color: AppColors.primary) : null,
+                    ),
+                    child: Center(child: Text(e, style: const TextStyle(fontSize: 22))),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: AppSpacing.base),
+            TextField(
+              controller: _objetivoCtrl,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+              decoration: const InputDecoration(
+                prefixText: '\$ ',
+                labelText: 'Objetivo (opcional)',
+                hintText: '0',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        FilledButton(onPressed: _crear, child: const Text('Crear')),
+      ],
+    );
+  }
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+
+class _ToggleBtn extends StatelessWidget {
+  const _ToggleBtn({
+    required this.label,
+    required this.activo,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool activo;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: activo ? color.withValues(alpha: 0.15) : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: activo ? color.withValues(alpha: 0.5) : Colors.transparent,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: activo ? color : AppColors.textTertiary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EstadoVacio extends StatelessWidget {
+  const _EstadoVacio();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: AppGradients.success,
+                borderRadius: BorderRadius.circular(AppRadius.xxl),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.success.withValues(alpha: 0.4),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.account_balance_wallet_rounded,
+                  color: Colors.white, size: 36),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            const Text(
+              'Sin bolsillos',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            const Text(
+              'Crea bolsillos para organizar\ntu dinero por categorías.',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textTertiary,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FABPremium extends StatelessWidget {
+  const _FABPremium({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppGradients.success,
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.success.withValues(alpha: 0.5),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: onPressed,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        highlightElevation: 0,
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: const Text(
+          'Nuevo bolsillo',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}

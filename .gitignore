@@ -1,3 +1,6 @@
+# Tool metadata
+.tool_appdata/
+
 # Miscellaneous
 *.class
 *.log
