@@ -32,13 +32,13 @@ class DashboardResumen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
       child: Column(
         children: [
           _TarjetaPlataHoy(monto: plataParaHoy),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           _TarjetaSaldo(saldo: saldo),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
@@ -49,7 +49,7 @@ class DashboardResumen extends StatelessWidget {
                   esPositivo: true,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: _TarjetaIndicador(
                   label: 'Gastos',
@@ -60,7 +60,7 @@ class DashboardResumen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           _TarjetaPresupuesto(
             presupuesto: presupuestoSemanal,
             gastado: gastadoSemana,
@@ -68,7 +68,7 @@ class DashboardResumen extends StatelessWidget {
             onEditar: onEditarPresupuesto,
           ),
           if (insightMensajes.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
             _TarjetaInsights(
               mensajes: insightMensajes,
               onTap: onTapInsights,
@@ -91,64 +91,98 @@ class _TarjetaPlataHoy extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
         gradient: colorScheme.heroGradient,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: colorScheme.primary.withValues(alpha: 0.3),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -28,
+              right: -28,
+              child: Container(
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.today_rounded, color: Colors.white, size: 18),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Plata para Hoy',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  letterSpacing: 0.2,
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.06),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            Formatos.moneda(monto),
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: -1,
-              height: 1.1,
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Disponible para gastar hoy',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.7),
-              fontWeight: FontWeight.w400,
+            Positioned(
+              bottom: -40,
+              right: 30,
+              child: Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.04),
+                ),
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.today_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Plata para Hoy',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.92),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    Formatos.moneda(monto),
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -1.2,
+                      height: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Disponible para gastar hoy',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -166,24 +200,30 @@ class _TarjetaSaldo extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: colorScheme.cardSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.cardBorder),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(Icons.account_balance_wallet_rounded,
-                size: 20, color: colorScheme.primary),
+                size: 22, color: colorScheme.primary),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,16 +234,17 @@ class _TarjetaSaldo extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: colorScheme.onSurfaceVariant,
+                    letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   '${esPositivo ? '' : '-'}${Formatos.moneda(saldo.abs())}',
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
                     color: colorScheme.onSurface,
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.6,
                   ),
                 ),
               ],
@@ -211,17 +252,17 @@ class _TarjetaSaldo extends StatelessWidget {
           ),
           if (!esPositivo)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: colorScheme.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: colorScheme.error.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 'Déficit',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   color: colorScheme.error,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -249,15 +290,21 @@ class _TarjetaIndicador extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final color = esPositivo ? colorScheme.positivo : colorScheme.error;
     final bgColor = esPositivo
-        ? colorScheme.positivoContainer
-        : colorScheme.errorContainer.withValues(alpha: 0.3);
+        ? colorScheme.positivoContainer.withValues(alpha: 0.2)
+        : colorScheme.error.withValues(alpha: 0.1);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: colorScheme.cardSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.cardBorder),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,31 +312,33 @@ class _TarjetaIndicador extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icono, size: 14, color: color),
+                child: Icon(icono, size: 16, color: color),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 13,
                   color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             Formatos.moneda(monto),
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
               color: color,
+              letterSpacing: -0.5,
             ),
           ),
         ],
@@ -320,11 +369,17 @@ class _TarjetaPresupuesto extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: colorScheme.cardSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.cardBorder),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.onSurface.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,11 +564,17 @@ class _TarjetaInsights extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: cs.subtleSurface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: cs.primary.withValues(alpha: 0.12)),
+          color: cs.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -215,55 +215,105 @@ class _BolsilloCard extends StatelessWidget {
     final esPositivo = saldo >= 0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.cardSurface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorScheme.cardBorder),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.onSurface.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: colorScheme.accentGradient,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 24),
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      gradient: colorScheme.accentGradient,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 26),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          bolsillo.nombre,
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${esPositivo ? 'Saldo' : 'Déficit'}: ${Formatos.moneda(saldo.abs())}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: esPositivo ? colorScheme.positivo : colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (v) {
+                      if (v == 'editar') onEditar();
+                      if (v == 'eliminar') onEliminar();
+                    },
+                    icon: Icon(Icons.more_vert_rounded, color: colorScheme.onSurfaceVariant, size: 24),
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'editar', child: Text('Editar')),
+                      PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 16),
+              if (bolsillo.saldoInicial > 0) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(bolsillo.nombre,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                    const SizedBox(height: 4),
                     Text(
-                      Formatos.moneda(saldo.abs()),
+                      'Saldo inicial: ${Formatos.moneda(bolsillo.saldoInicial)}',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 12,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      esPositivo
+                          ? '${((saldo / bolsillo.saldoInicial).clamp(0, 1) * 100).toInt()}%'
+                          : '0%',
+                      style: TextStyle(
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: esPositivo ? colorScheme.positivo : colorScheme.error,
                       ),
                     ),
                   ],
                 ),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (v) {
-                  if (v == 'editar') onEditar();
-                  if (v == 'eliminar') onEliminar();
-                },
-                icon: Icon(Icons.more_vert_rounded, color: colorScheme.onSurfaceVariant),
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'editar', child: Text('Editar')),
-                  PopupMenuItem(value: 'eliminar', child: Text('Eliminar')),
-                ],
+                const SizedBox(height: 8),
+              ],
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: bolsillo.saldoInicial > 0
+                      ? (saldo / bolsillo.saldoInicial).clamp(0.0, 1.0)
+                      : (esPositivo ? 1.0 : 0.0),
+                  minHeight: 6,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  color: esPositivo ? colorScheme.positivo : colorScheme.error,
+                ),
               ),
             ],
           ),

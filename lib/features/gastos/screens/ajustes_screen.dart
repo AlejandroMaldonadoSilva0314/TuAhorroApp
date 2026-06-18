@@ -85,6 +85,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 _tileMoneda(cs),
                 _tileFormatoFecha(cs),
                 _tileTema(cs),
+                _tileReiniciarOnboarding(),
                 _seccion('Finanzas'),
                 _tilePresupuesto(cs),
                 _tileDiaInicio(cs),
@@ -96,8 +97,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 _tileExportar(cs),
                 _tileImportar(cs),
                 _tileEspacio(cs),
-                _seccion('Onboarding'),
-                _tileReiniciarOnboarding(),
                 _seccion('Información'),
                 _tileVersion(),
                 _tileEquipo(),
@@ -111,13 +110,13 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _seccion(String titulo) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 8),
       child: Text(
         titulo.toUpperCase(),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          letterSpacing: 1.0,
+          letterSpacing: 1.2,
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
@@ -543,18 +542,18 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   Widget _iconContainer(IconData icon, ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        color: cs.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: cs.primary, size: 20),
+      child: Icon(icon, color: cs.primary, size: 22),
     );
   }
 
   Widget _chevron(ColorScheme cs) {
-    return Icon(Icons.chevron_right_rounded, size: 20,
-        color: cs.onSurfaceVariant.withValues(alpha: 0.4));
+    return Icon(Icons.chevron_right_rounded, size: 22,
+        color: cs.onSurfaceVariant.withValues(alpha: 0.5));
   }
 
   void _mostrarTextoLegal(String titulo, String contenido) {

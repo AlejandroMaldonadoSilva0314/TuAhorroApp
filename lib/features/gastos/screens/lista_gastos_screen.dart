@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../data/gasto_repository.dart';
 import '../logic/insights_calculator.dart';
 import '../logic/plata_para_hoy.dart';
@@ -58,6 +59,13 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   void dispose() {
     _busquedaController.dispose();
     super.dispose();
+  }
+
+  String _saludoDelDia() {
+    final hora = DateTime.now().hour;
+    if (hora < 12) return 'Buenos días';
+    if (hora < 18) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 
   void _aplicarFiltros() {
@@ -157,12 +165,27 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'TuAhorro',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        toolbarHeight: 64,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _saludoDelDia(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+            ),
+            Text(
+              'TuAhorro',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.3,
               ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -181,11 +204,6 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
               });
             },
             tooltip: 'Buscar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 22),
-            onPressed: _cargarGastos,
-            tooltip: 'Actualizar',
           ),
         ],
       ),
@@ -258,7 +276,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.auto_awesome_rounded,
               label: 'Insights',
-              color: cs.primary,
+              color: const Color(0xFFD97706),
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(InsightsScreen(repository: widget.repository));
@@ -267,7 +285,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.flag_rounded,
               label: 'Metas de ahorro',
-              color: cs.primary,
+              color: const Color(0xFF059669),
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(MetasScreen(repository: widget.repository));
@@ -276,7 +294,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.handshake_outlined,
               label: 'Fiados',
-              color: cs.primary,
+              color: const Color(0xFFEA580C),
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(FiadosScreen(repository: widget.repository));
@@ -285,7 +303,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.category_rounded,
               label: 'Categorías',
-              color: cs.primary,
+              color: const Color(0xFF3B82F6),
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(CategoriasScreen(repository: widget.repository));
@@ -294,7 +312,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.settings_rounded,
               label: 'Ajustes',
-              color: cs.primary,
+              color: cs.onSurfaceVariant,
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(AjustesScreen(
@@ -338,25 +356,58 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
     }
 
     if (_gastos.isEmpty) {
+      final cs = Theme.of(context).colorScheme;
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: cs.heroGradient,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: cs.primary.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.receipt_long_outlined, size: 36, color: Colors.white),
               ),
-              child: Icon(Icons.receipt_long_outlined, size: 48,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
-            ),
-            const SizedBox(height: 20),
-            Text('No hay movimientos', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 6),
-            Text('Toca + para agregar el primero',
-                style: Theme.of(context).textTheme.bodySmall),
-          ],
+              const SizedBox(height: 24),
+              Text(
+                'Aún no hay movimientos',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Registra tu primer ingreso o gasto\npara controlar tus finanzas.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  height: 1.6,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              FilledButton.icon(
+                onPressed: () => _navegarA(RegistroScreen(
+                  onGuardar: widget.repository.agregarGasto,
+                  bolsillos: _bolsillos,
+                  categorias: _categorias,
+                )),
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: const Text('Agregar movimiento'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -410,15 +461,36 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       );
     }
 
+    final cs = Theme.of(context).colorScheme;
     headerWidgets.add(
       Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-        child: Text(
-          'Movimientos recientes',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                letterSpacing: 0.2,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+        child: Row(
+          children: [
+            Text(
+              'Movimientos',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
               ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${_gastosFiltrados.length}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -282,36 +282,42 @@ class _MetaCard extends StatelessWidget {
     final progressColor = meta.completada ? colorScheme.positivo : colorScheme.primary;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.cardSurface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorScheme.cardBorder),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.onSurface.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: meta.completada
-                          ? colorScheme.positivoContainer
-                          : colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                          ? colorScheme.positivo.withValues(alpha: 0.15)
+                          : colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
-                      meta.completada ? Icons.check_rounded : Icons.flag_rounded,
-                      color: meta.completada ? colorScheme.positivo : colorScheme.primary,
-                      size: 22,
+                      meta.completada ? Icons.emoji_events_rounded : Icons.flag_rounded,
+                      color: progressColor,
+                      size: 26,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,15 +325,16 @@ class _MetaCard extends StatelessWidget {
                         Text(
                           meta.nombre,
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
                             decoration: meta.completada ? TextDecoration.lineThrough : null,
+                            color: colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
-                          '${Formatos.moneda(meta.montoActual)} de ${Formatos.moneda(meta.montoObjetivo)}',
-                          style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+                          '${Formatos.moneda(meta.montoActual)} / ${Formatos.moneda(meta.montoObjetivo)}',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -350,31 +357,38 @@ class _MetaCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: meta.progreso,
-                  minHeight: 8,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  color: progressColor,
+                borderRadius: BorderRadius.circular(12),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: meta.progreso),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      minHeight: 8,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                      color: progressColor,
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: progressColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: progressColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '$porcentaje%',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
                         color: progressColor,
                       ),
                     ),
@@ -382,22 +396,35 @@ class _MetaCard extends StatelessWidget {
                   if (!meta.completada)
                     Text(
                       'Faltan ${Formatos.moneda(meta.faltante)}',
-                      style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
                     ),
                   if (meta.completada)
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_rounded, size: 14, color: colorScheme.positivo),
-                        const SizedBox(width: 4),
+                        Icon(Icons.check_circle_rounded, size: 16, color: colorScheme.positivo),
+                        const SizedBox(width: 6),
                         Text(
-                          'Meta alcanzada',
-                          style: TextStyle(fontSize: 12, color: colorScheme.positivo, fontWeight: FontWeight.w600),
+                          '¡Meta alcanzada!',
+                          style: TextStyle(fontSize: 13, color: colorScheme.positivo, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
                 ],
               ),
+              if (!meta.completada && onAbonar != null) ...[
+                const SizedBox(height: 14),
+                FilledButton.tonal(
+                  onPressed: onAbonar,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Abonar a esta meta'),
+                ),
+              ],
             ],
           ),
         ),

@@ -49,24 +49,20 @@ class AppTheme {
 
       cardTheme: CardThemeData(
         elevation: 0,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.black.withValues(alpha: 0.04),
-          ),
+          borderRadius: BorderRadius.circular(20),
         ),
         color: colorScheme.surfaceContainerLowest,
+        shadowColor: colorScheme.onSurface.withValues(alpha: 0.08),
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         elevation: 0,
-        highlightElevation: 2,
+        highlightElevation: 4,
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
@@ -97,17 +93,19 @@ class AppTheme {
       ),
 
       dialogTheme: DialogThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         elevation: 0,
         backgroundColor: colorScheme.surfaceContainerLowest,
+        surfaceTintColor: Colors.transparent,
       ),
 
       bottomSheetTheme: BottomSheetThemeData(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         backgroundColor: colorScheme.surfaceContainerLowest,
         showDragHandle: true,
+        elevation: 0,
       ),
 
       listTileTheme: ListTileThemeData(

@@ -27,42 +27,45 @@ class GastoCard extends StatelessWidget {
     final cat = _categoria;
     final esIngreso = gasto.tipo == TipoTransaccion.ingreso;
     final montoColor = esIngreso ? colorScheme.positivo : colorScheme.error;
+    final iconBg = esIngreso
+        ? colorScheme.positivo.withValues(alpha: 0.15)
+        : colorScheme.error.withValues(alpha: 0.12);
 
     return Card(
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onLongPress: onEliminar,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: esIngreso
-                      ? colorScheme.positivoContainer
-                      : colorScheme.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   cat?.icono ?? Icons.category_outlined,
-                  color: esIngreso ? colorScheme.positivo : colorScheme.primary,
-                  size: 22,
+                  color: montoColor,
+                  size: 24,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       gasto.titulo,
-                      style: textTheme.titleSmall,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(
                       '${cat?.nombre ?? gasto.categoriaId} · ${Formatos.fecha(gasto.fecha)}',
                       style: textTheme.bodySmall,
@@ -70,36 +73,13 @@ class GastoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${esIngreso ? '+' : '-'}${Formatos.moneda(gasto.monto)}',
-                    style: textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: montoColor,
-                    ),
-                  ),
-                  if (onEliminar != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 3),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: montoColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          esIngreso ? 'Ingreso' : 'Gasto',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: montoColor.withValues(alpha: 0.8),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              const SizedBox(width: 12),
+              Text(
+                '${esIngreso ? '+' : '-'}${Formatos.moneda(gasto.monto)}',
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: montoColor,
+                ),
               ),
             ],
           ),
