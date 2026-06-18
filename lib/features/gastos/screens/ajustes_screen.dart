@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../data/gasto_repository.dart';
 import '../logic/backup_service.dart';
 import '../logic/notificacion_service.dart';
@@ -87,6 +88,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   _tileMoneda(cs),
                   _tileFormatoFecha(cs),
                   _tileTema(cs),
+                  _tileTemaColor(cs),
                   _tileReiniciarOnboarding(),
                 ]),
                 _seccion('Finanzas'),
@@ -123,13 +125,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1B1630), Color(0xFF241B3E)],
-        ),
+        gradient: cs.accentGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0x1AFFFFFF)),
+        border: Border.all(color: cs.cardBorder),
       ),
       child: Row(
         children: [
@@ -137,16 +135,11 @@ class _AjustesScreenState extends State<AjustesScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF5B18D4), Color(0xFF8B35F7), Color(0xFFC084FC)],
-                stops: [0.0, 0.55, 1.0],
-              ),
+              gradient: cs.heroGradient,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF7B2FF7).withValues(alpha: 0.40),
+                  color: cs.primary.withValues(alpha: 0.40),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
@@ -159,21 +152,21 @@ class _AjustesScreenState extends State<AjustesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'TuAhorro',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFFFFFFF),
+                    color: cs.onAccentSurface,
                     letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Espacio: ${_formatearEspacio(_espacioBytes)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF9CA3AF),
+                    color: cs.onAccentSurface.withValues(alpha: 0.70),
                   ),
                 ),
               ],
@@ -182,18 +175,18 @@ class _AjustesScreenState extends State<AjustesScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF7B2FF7).withValues(alpha: 0.15),
+              color: cs.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFF7B2FF7).withValues(alpha: 0.30),
+                color: cs.primary.withValues(alpha: 0.30),
               ),
             ),
-            child: const Text(
+            child: Text(
               'v1.0.0',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFA855F7),
+                color: cs.primary,
                 letterSpacing: 0.2,
               ),
             ),
@@ -335,6 +328,87 @@ class _AjustesScreenState extends State<AjustesScreen> {
         );
         if (seleccion != null && seleccion != _settings.tema) {
           await _actualizar(_settings.copyWith(tema: seleccion));
+        }
+      },
+    );
+  }
+
+  Widget _tileTemaColor(ColorScheme cs) {
+    const configs = [
+      (TemaColor.premiumRoyal, Color(0xFF7B2FF7), 'Royal'),
+      (TemaColor.midnight,     Color(0xFF3B82F6), 'Midnight'),
+      (TemaColor.aurora,       Color(0xFF06B6D4), 'Aurora'),
+      (TemaColor.emerald,      Color(0xFF10B981), 'Emerald'),
+      (TemaColor.sunset,       Color(0xFFF97316), 'Sunset'),
+      (TemaColor.ruby,         Color(0xFFE11D48), 'Ruby'),
+      (TemaColor.lavender,     Color(0xFF8B5CF6), 'Lavender'),
+    ];
+    return ListTile(
+      leading: _iconContainer(Icons.color_lens_rounded, cs),
+      title: const Text('Color del tema'),
+      subtitle: Text(_settings.temaColorLabel),
+      trailing: _chevron(cs),
+      onTap: () async {
+        final sel = await showDialog<TemaColor>(
+          context: context,
+          builder: (_) => SimpleDialog(
+            title: const Text('Color del tema'),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: configs.map((entry) {
+                    final (tema, color, label) = entry;
+                    final selected = tema == _settings.temaColor;
+                    return GestureDetector(
+                      onTap: () => Navigator.pop(context, tema),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: selected ? Colors.white : Colors.transparent,
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color.withValues(alpha: 0.45),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: selected
+                                ? const Icon(Icons.check_rounded, color: Colors.white, size: 22)
+                                : null,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (sel != null && sel != _settings.temaColor) {
+          await _actualizar(_settings.copyWith(temaColor: sel));
         }
       },
     );

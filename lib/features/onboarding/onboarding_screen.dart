@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onCompleto});
@@ -72,8 +72,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final slide = _slides[_pagina];
     final esUltima = _pagina == _slides.length - 1;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: AppColors.base900,
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
           // Fondo con gradiente animado
@@ -85,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 end: Alignment.bottomRight,
                 colors: [
                   slide.gradientColors[0].withValues(alpha: 0.6),
-                  AppColors.base900,
+                  colorScheme.surface,
                 ],
               ),
             ),
@@ -98,9 +99,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   alignment: Alignment.topRight,
                   child: TextButton(
                     onPressed: _terminar,
-                    child: const Text(
+                    child: Text(
                       'Saltar',
-                      style: TextStyle(color: AppColors.textTertiary),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -137,8 +138,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             height: 8,
                             decoration: BoxDecoration(
                               color: _pagina == i
-                                  ? AppColors.primary
-                                  : AppColors.outlineDim,
+                                  ? colorScheme.primary
+                                  : colorScheme.outlineVariant,
                               borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
                           ),
@@ -150,11 +151,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: double.infinity,
                         height: 56,
                         decoration: BoxDecoration(
-                          gradient: AppGradients.primary,
+                          gradient: colorScheme.heroGradient,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.45),
+                              color: colorScheme.primary.withValues(alpha: 0.45),
                               blurRadius: 20,
                               offset: const Offset(0, 6),
                             ),
@@ -248,10 +249,10 @@ class _SlideView extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text(
             slide.titulo,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.8,
               height: 1.2,
             ),
@@ -260,9 +261,9 @@ class _SlideView extends StatelessWidget {
           const SizedBox(height: AppSpacing.base),
           Text(
             slide.descripcion,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.6,
             ),
             textAlign: TextAlign.center,

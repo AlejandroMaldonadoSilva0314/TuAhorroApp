@@ -157,7 +157,7 @@ class _HeaderResumen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: AppGradients.hero,
+        gradient: Theme.of(context).colorScheme.heroGradient,
         boxShadow: AppShadows.hero,
       ),
       child: SafeArea(
@@ -310,7 +310,7 @@ class _MetricaBlanca extends StatelessWidget {
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: esNegativo
-                    ? const Color(0xFFFFB86C)
+                    ? Theme.of(context).colorScheme.alerta
                     : Colors.white,
                 letterSpacing: -0.4,
               ),
@@ -406,11 +406,7 @@ class _TarjetaTop3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const colores = [
-      Color(0xFF7B2FF7),
-      Color(0xFFA855F7),
-      Color(0xFFC084FC),
-    ];
+    final colores = cs.chartColors.take(3).toList();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.base),

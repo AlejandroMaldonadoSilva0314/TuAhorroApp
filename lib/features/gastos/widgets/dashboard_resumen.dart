@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
+import '../models/fiado.dart';
 
 class DashboardResumen extends StatelessWidget {
   const DashboardResumen({
@@ -14,8 +15,10 @@ class DashboardResumen extends StatelessWidget {
     required this.gastadoSemana,
     required this.disponibleSemana,
     required this.onEditarPresupuesto,
+    required this.fiadosPorCobrar,
     this.insightMensajes = const [],
     this.onTapInsights,
+    this.onVerFiados,
   });
 
   final double ingresos;
@@ -26,8 +29,10 @@ class DashboardResumen extends StatelessWidget {
   final double gastadoSemana;
   final double disponibleSemana;
   final ValueChanged<double> onEditarPresupuesto;
+  final List<Fiado> fiadosPorCobrar;
   final List<String> insightMensajes;
   final VoidCallback? onTapInsights;
+  final VoidCallback? onVerFiados;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +64,11 @@ class DashboardResumen extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             _TarjetaInsights(mensajes: insightMensajes, onTap: onTapInsights),
           ],
+          const SizedBox(height: AppSpacing.md),
+          _TarjetaDineroPorCobrar(
+            fiados: fiadosPorCobrar,
+            onVerTodos: onVerFiados,
+          ),
         ],
       ),
     );
@@ -80,11 +90,9 @@ class _HeroPlataHoy extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: esPositivo ? AppGradients.hero : const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF3B1010), Color(0xFF7F1D1D)],
-        ),
+        gradient: esPositivo
+            ? Theme.of(context).colorScheme.heroGradient
+            : AppGradients.danger,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
         boxShadow: AppShadows.hero,
       ),
@@ -229,7 +237,7 @@ class _HeroPlataHoy extends StatelessWidget {
                                   height: 4,
                                   decoration: BoxDecoration(
                                     color: porcentajePresupuesto! > 0.9
-                                        ? const Color(0xFFFFB86C)
+                                        ? Theme.of(context).colorScheme.alerta
                                         : Colors.white,
                                     borderRadius: BorderRadius.circular(AppRadius.pill),
                                   ),
@@ -505,10 +513,7 @@ class _TarjetaPresupuesto extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: excedido
                             ? [cs.error, cs.error.withValues(alpha: 0.8)]
-                            : [
-                                const Color(0xFF7B2FF7),
-                                const Color(0xFFA855F7),
-                              ],
+                            : [cs.primary, cs.primaryContainer],
                       ),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                       boxShadow: [
@@ -637,6 +642,235 @@ class _MiniIndicador extends StatelessWidget {
               fontSize: 13, fontWeight: FontWeight.w700, color: color),
         ),
       ],
+    );
+  }
+}
+
+// ── TARJETA DINERO POR COBRAR ────────────────────────────────────────────────
+
+class _TarjetaDineroPorCobrar extends StatelessWidget {
+  const _TarjetaDineroPorCobrar({required this.fiados, this.onVerTodos});
+
+  final List<Fiado> fiados;
+  final VoidCallback? onVerTodos;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final color = cs.alerta;
+    final hayFiados = fiados.isNotEmpty;
+    final total = fiados.fold(0.0, (s, f) => s + f.monto);
+    final personas = fiados.map((f) => f.nombre).toSet().length;
+    final proximo = hayFiados
+        ? fiados.reduce((a, b) => a.fecha.isBefore(b.fecha) ? a : b)
+        : null;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: cs.cardSurface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: cs.cardBorder),
+        boxShadow: AppShadows.card,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Línea de acento superior
+            Container(
+              height: 3,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withValues(alpha: 0.30)],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.base),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: Icon(Icons.handshake_outlined, size: 16, color: color),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Dinero por Cobrar',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: onVerTodos,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Ver todos',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: color,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(Icons.chevron_right_rounded, size: 14, color: color),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.base),
+                  // Contenido
+                  if (!hayFiados)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 16,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.45),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            'No tienes dinero pendiente por cobrar',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else ...[
+                    // Monto total
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Te deben ${Formatos.moneda(total)}',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: color,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      personas == 1
+                          ? '1 persona tiene dinero pendiente'
+                          : '$personas personas tienen dinero pendiente',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    // Próximo pendiente
+                    if (proximo != null) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.07),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  proximo.nombre.isNotEmpty
+                                      ? proximo.nombre[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: color,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    proximo.nombre,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onSurface,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (proximo.nota != null && proximo.nota!.isNotEmpty)
+                                    Text(
+                                      proximo.nota!,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              Formatos.moneda(proximo.monto),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

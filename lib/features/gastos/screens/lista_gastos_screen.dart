@@ -7,6 +7,7 @@ import '../logic/plata_para_hoy.dart';
 import '../logic/presupuesto_semanal.dart';
 import '../logic/transaccion_filter.dart';
 import '../models/categoria.dart';
+import '../models/fiado.dart';
 import '../models/gasto.dart';
 import '../models/transaccion_filtro.dart';
 import '../widgets/dashboard_resumen.dart';
@@ -40,6 +41,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
   List<Gasto> _gastosFiltrados = [];
   List<Bolsillo> _bolsillos = [];
   List<Categoria> _categorias = [];
+  List<Fiado> _fiados = [];
   double _presupuesto = 0;
   List<String> _insightMensajes = [];
   bool _cargando = true;
@@ -94,6 +96,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         widget.repository.obtenerPresupuestoSemanal(),
         widget.repository.obtenerBolsillos(),
         widget.repository.obtenerCategorias(),
+        widget.repository.obtenerFiados(),
       ]);
       if (mounted) {
         setState(() {
@@ -101,6 +104,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
           _presupuesto = resultados[1] as double;
           _bolsillos = resultados[2] as List<Bolsillo>;
           _categorias = resultados[3] as List<Categoria>;
+          _fiados = resultados[4] as List<Fiado>;
           _insightMensajes = InsightsCalculator(
             nombreCategoria: _nombreCategoria,
           ).calcular(_gastos).mensajes;
@@ -143,6 +147,10 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         saldo: _saldo,
         disponibleSemanal: _presupuesto > 0 ? _disponibleSemana : null,
       );
+
+  List<Fiado> get _fiadosPorCobrar => _fiados
+      .where((f) => f.tipo == TipoFiado.porCobrar && !f.pagado)
+      .toList();
 
   Future<void> _actualizarPresupuesto(double monto) async {
     await widget.repository.guardarPresupuestoSemanal(monto);
@@ -242,10 +250,10 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF130F22),
+          color: cs.surface,
           border: Border(
             top: BorderSide(
-              color: Colors.white.withValues(alpha: 0.07),
+              color: cs.outlineVariant.withValues(alpha: 0.15),
               width: 0.5,
             ),
           ),
@@ -259,7 +267,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         ),
         child: NavigationBar(
           backgroundColor: Colors.transparent,
-          indicatorColor: const Color(0xFF7B2FF7).withValues(alpha: 0.18),
+          indicatorColor: cs.primary.withValues(alpha: 0.18),
           height: 68,
           selectedIndex: 0,
           onDestinationSelected: (index) {
@@ -312,7 +320,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.auto_awesome_rounded,
               label: 'Insights',
-              color: const Color(0xFFD97706),
+              color: cs.alerta,
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(InsightsScreen(repository: widget.repository));
@@ -321,7 +329,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.flag_rounded,
               label: 'Metas de ahorro',
-              color: const Color(0xFF059669),
+              color: cs.positivo,
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(MetasScreen(repository: widget.repository));
@@ -330,7 +338,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.handshake_outlined,
               label: 'Fiados',
-              color: const Color(0xFFEA580C),
+              color: cs.error,
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(FiadosScreen(repository: widget.repository));
@@ -339,7 +347,7 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
             _MenuTile(
               icon: Icons.category_rounded,
               label: 'Categorías',
-              color: const Color(0xFF3B82F6),
+              color: cs.primary,
               onTap: () {
                 Navigator.pop(ctx);
                 _navegarA(CategoriasScreen(repository: widget.repository));
@@ -458,6 +466,8 @@ class _ListaGastosScreenState extends State<ListaGastosScreen> {
         gastadoSemana: _gastadoSemana,
         disponibleSemana: _disponibleSemana,
         onEditarPresupuesto: _actualizarPresupuesto,
+        fiadosPorCobrar: _fiadosPorCobrar,
+        onVerFiados: () => _navegarA(FiadosScreen(repository: widget.repository)),
         insightMensajes: _insightMensajes,
         onTapInsights: () => _navegarA(InsightsScreen(repository: widget.repository)),
       ),

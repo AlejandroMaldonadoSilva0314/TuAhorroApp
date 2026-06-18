@@ -33,7 +33,6 @@ class _MainNavShellState extends State<MainNavShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.base900,
       body: IndexedStack(
         index: _tabActual,
         children: [
@@ -66,15 +65,18 @@ class _NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF130F22),
-        border: const Border(
-          top: BorderSide(color: AppColors.outlineDim, width: 0.5),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15),
+            width: 0.5,
+          ),
         ),
         boxShadow: AppShadows.navBar,
       ),
       child: NavigationBar(
         backgroundColor: Colors.transparent,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.18),
+        indicatorColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
         selectedIndex: tabActual,
         onDestinationSelected: onCambio,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,

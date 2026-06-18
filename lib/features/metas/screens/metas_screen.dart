@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/meta_repository.dart';
 import '../models/meta.dart';
@@ -39,7 +39,7 @@ class _MetasScreenState extends State<MetasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.base900,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -49,10 +49,10 @@ class _MetasScreenState extends State<MetasScreen> {
             ),
           ),
           if (_cargando)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   strokeWidth: 2.5,
                 ),
               ),
@@ -132,6 +132,7 @@ class _Encabezado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final tieneObjetivo =
         totalObjetivo != null && totalAhorrado != null && totalObjetivo! > 0;
     final progreso = tieneObjetivo
@@ -139,7 +140,7 @@ class _Encabezado extends StatelessWidget {
         : 0.0;
 
     return Container(
-      color: AppColors.base900,
+      color: cs.surface,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.base,
         MediaQuery.of(context).padding.top + AppSpacing.sm,
@@ -156,11 +157,11 @@ class _Encabezado extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  gradient: AppGradients.primary,
+                  gradient: cs.heroGradient,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.40),
+                      color: cs.primary.withValues(alpha: 0.40),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -170,12 +171,12 @@ class _Encabezado extends StatelessWidget {
                     color: Colors.white, size: 17),
               ),
               const SizedBox(width: AppSpacing.md),
-              const Text(
+              Text(
                 'Metas',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: cs.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -188,9 +189,9 @@ class _Encabezado extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                gradient: AppGradients.card,
+                gradient: cs.accentGradient,
                 borderRadius: BorderRadius.circular(AppRadius.xxl),
-                border: Border.all(color: AppColors.outlineDim),
+                border: Border.all(color: cs.cardBorder),
               ),
               child: Row(
                 children: [
@@ -207,12 +208,11 @@ class _Encabezado extends StatelessWidget {
                           child: CircularProgressIndicator(
                             value: progreso,
                             strokeWidth: 7,
-                            backgroundColor:
-                                AppColors.outlineDim,
+                            backgroundColor: cs.cardBorder,
                             valueColor: AlwaysStoppedAnimation(
                               progreso >= 1.0
-                                  ? AppColors.success
-                                  : AppColors.primaryLight,
+                                  ? cs.positivo
+                                  : cs.primaryContainer,
                             ),
                           ),
                         ),
@@ -221,20 +221,20 @@ class _Encabezado extends StatelessWidget {
                           children: [
                             Text(
                               '${(progreso * 100).round()}%',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w900,
-                                color: AppColors.textPrimary,
+                                color: cs.onSurface,
                                 letterSpacing: -0.8,
                                 height: 1.0,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'logrado',
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textTertiary,
+                                color: cs.onSurfaceVariant,
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -249,12 +249,12 @@ class _Encabezado extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'AHORRADO',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textTertiary,
+                            color: cs.onSurfaceVariant,
                             letterSpacing: 1.3,
                           ),
                         ),
@@ -264,10 +264,10 @@ class _Encabezado extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             Formatos.moneda(totalAhorrado!),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: cs.onSurface,
                               letterSpacing: -0.6,
                             ),
                           ),
@@ -275,9 +275,9 @@ class _Encabezado extends StatelessWidget {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           'meta ${Formatos.moneda(totalObjetivo!)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.textTertiary,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -308,20 +308,21 @@ class _MetaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final pct = (meta.progreso * 100).toStringAsFixed(0);
-    final color = meta.completada ? AppColors.success : AppColors.primaryLight;
+    final color = meta.completada ? cs.positivo : cs.primaryContainer;
 
     return GestureDetector(
       onTap: onAbonar,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          gradient: AppGradients.card,
+          gradient: cs.accentGradient,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
             color: meta.completada
-                ? AppColors.success.withValues(alpha: 0.4)
-                : AppColors.outlineDim,
+                ? cs.positivo.withValues(alpha: 0.4)
+                : cs.cardBorder,
           ),
         ),
         child: Column(
@@ -342,15 +343,15 @@ class _MetaCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: meta.progreso,
                           strokeWidth: 3.5,
-                          backgroundColor: AppColors.outlineDim,
+                          backgroundColor: cs.cardBorder,
                           valueColor: AlwaysStoppedAnimation(color),
                         ),
                       ),
                       Container(
                         width: 44,
                         height: 44,
-                        decoration: const BoxDecoration(
-                          color: AppColors.surface300,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainer,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -371,10 +372,10 @@ class _MetaCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               meta.nombre,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: cs.onSurface,
                                 letterSpacing: -0.2,
                               ),
                               maxLines: 1,
@@ -386,14 +387,14 @@ class _MetaCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.15),
+                                color: cs.positivo.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(AppRadius.pill),
                               ),
-                              child: const Text(
+                              child: Text(
                                 '✓ Lograda',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.success,
+                                  color: cs.positivo,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -403,9 +404,9 @@ class _MetaCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         '${Formatos.moneda(meta.ahorrado)} de ${Formatos.moneda(meta.objetivo)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textTertiary,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -427,9 +428,9 @@ class _MetaCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Fecha objetivo: ${Formatos.fecha(meta.fechaObjetivo!)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textTertiary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ],
@@ -483,7 +484,7 @@ class _DialogAbonarState extends State<_DialogAbonar> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             child: const Text('Eliminar'),
           ),
         ],
@@ -497,6 +498,7 @@ class _DialogAbonarState extends State<_DialogAbonar> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final faltante = widget.meta.faltante;
 
     return AlertDialog(
@@ -507,7 +509,7 @@ class _DialogAbonarState extends State<_DialogAbonar> {
           Expanded(
             child: Text(
               widget.meta.nombre,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: cs.onSurface),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -522,20 +524,20 @@ class _DialogAbonarState extends State<_DialogAbonar> {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.12),
+                color: cs.positivo.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: const Text(
+              child: Text(
                 '¡Meta completada! 🎉',
-                style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600),
+                style: TextStyle(color: cs.positivo, fontWeight: FontWeight.w600),
               ),
             )
           else
             Text(
               'Faltan ${Formatos.moneda(faltante)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
             ),
           const SizedBox(height: AppSpacing.base),
@@ -555,7 +557,7 @@ class _DialogAbonarState extends State<_DialogAbonar> {
       actions: [
         TextButton(
           onPressed: _eliminar,
-          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+          style: TextButton.styleFrom(foregroundColor: cs.error),
           child: const Text('Eliminar'),
         ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
@@ -604,6 +606,7 @@ class _DialogCrearState extends State<_DialogCrear> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AlertDialog(
       title: const Text('Nueva meta'),
       content: SingleChildScrollView(
@@ -629,12 +632,12 @@ class _DialogCrearState extends State<_DialogCrear> {
               ),
             ),
             const SizedBox(height: AppSpacing.base),
-            const Text(
+            Text(
               'ÍCONO',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textTertiary,
+                color: cs.onSurfaceVariant,
                 letterSpacing: 1.2,
               ),
             ),
@@ -650,9 +653,9 @@ class _DialogCrearState extends State<_DialogCrear> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: sel ? AppColors.primary.withValues(alpha: 0.2) : AppColors.surface200,
+                      color: sel ? cs.primary.withValues(alpha: 0.2) : cs.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(AppRadius.sm),
-                      border: sel ? Border.all(color: AppColors.primary) : null,
+                      border: sel ? Border.all(color: cs.primary) : null,
                     ),
                     child: Center(child: Text(e, style: const TextStyle(fontSize: 22))),
                   ),
@@ -677,6 +680,7 @@ class _EstadoVacio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -687,11 +691,11 @@ class _EstadoVacio extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                gradient: AppGradients.primary,
+                gradient: cs.heroGradient,
                 borderRadius: BorderRadius.circular(AppRadius.xxl),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.4),
+                    color: cs.primary.withValues(alpha: 0.4),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -700,21 +704,21 @@ class _EstadoVacio extends StatelessWidget {
               child: const Icon(Icons.flag_rounded, color: Colors.white, size: 36),
             ),
             const SizedBox(height: AppSpacing.xl),
-            const Text(
+            Text(
               'Sin metas',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: cs.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            const Text(
+            Text(
               'Crea una meta de ahorro\ny empieza a cumplir tus sueños.',
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textTertiary,
+                color: cs.onSurfaceVariant,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -733,13 +737,14 @@ class _FABPremium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        gradient: AppGradients.primary,
+        gradient: cs.heroGradient,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.5),
+            color: cs.primary.withValues(alpha: 0.5),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),

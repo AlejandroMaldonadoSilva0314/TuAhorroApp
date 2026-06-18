@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'app_design_system.dart';
 export 'app_design_system.dart';
 
 class AppTheme {
@@ -8,24 +9,49 @@ class AppTheme {
 
   static const _fontFamily = 'Roboto';
 
-  // Premium Royal seed — deep violet #7B2FF7
-  static const _seedColor = Color(0xFF7B2FF7);
+  static ThemeData light([TemaColor temaColor = TemaColor.premiumRoyal]) =>
+      _build(Brightness.light, temaColor);
+  static ThemeData dark([TemaColor temaColor = TemaColor.premiumRoyal]) =>
+      _build(Brightness.dark, temaColor);
 
-  static ThemeData light() => _build(Brightness.light);
-  static ThemeData dark()  => _build(Brightness.dark);
+  static Color _seedForTema(TemaColor t) => switch (t) {
+    TemaColor.premiumRoyal => const Color(0xFF7B2FF7),
+    TemaColor.midnight     => const Color(0xFF3B82F6),
+    TemaColor.aurora       => const Color(0xFF06B6D4),
+    TemaColor.emerald      => const Color(0xFF10B981),
+    TemaColor.sunset       => const Color(0xFFF97316),
+    TemaColor.ruby         => const Color(0xFFE11D48),
+    TemaColor.lavender     => const Color(0xFF8B5CF6),
+  };
 
-  static ThemeData _build(Brightness brightness) {
+  static Color _darkSurfaceForTema(TemaColor t) => switch (t) {
+    TemaColor.premiumRoyal => const Color(0xFF0F0B1D),
+    TemaColor.midnight     => const Color(0xFF070B14),
+    TemaColor.aurora       => const Color(0xFF04141A),
+    TemaColor.emerald      => const Color(0xFF041A11),
+    TemaColor.sunset       => const Color(0xFF1A0D04),
+    TemaColor.ruby         => const Color(0xFF1A0409),
+    TemaColor.lavender     => const Color(0xFF100D1E),
+  };
+
+  static Color _darkCardForTema(TemaColor t) => switch (t) {
+    TemaColor.premiumRoyal => const Color(0xFF1B1630),
+    TemaColor.midnight     => const Color(0xFF0F1829),
+    TemaColor.aurora       => const Color(0xFF0A2530),
+    TemaColor.emerald      => const Color(0xFF0A2B1E),
+    TemaColor.sunset       => const Color(0xFF2D1A0A),
+    TemaColor.ruby         => const Color(0xFF2D0A15),
+    TemaColor.lavender     => const Color(0xFF1C1735),
+  };
+
+  static ThemeData _build(Brightness brightness, TemaColor temaColor) {
     final isDark = brightness == Brightness.dark;
+    final seed = _seedForTema(temaColor);
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: seed,
       brightness: brightness,
-      // Premium Royal dark surfaces
-      surface:                  isDark ? const Color(0xFF0F0B1D) : const Color(0xFFF7F6FC),
-      surfaceContainerLowest:   isDark ? const Color(0xFF1B1630) : Colors.white,
-      surfaceContainerLow:      isDark ? const Color(0xFF241B3E) : const Color(0xFFF1F0F8),
-      surfaceContainer:         isDark ? const Color(0xFF2D2250) : const Color(0xFFEBEAF4),
-      surfaceContainerHigh:     isDark ? const Color(0xFF362A5E) : const Color(0xFFE4E3EF),
-      surfaceContainerHighest:  isDark ? const Color(0xFF3F316A) : const Color(0xFFDBDAE8),
+      surface: isDark ? _darkSurfaceForTema(temaColor) : const Color(0xFFF7F6FC),
+      surfaceContainerLowest: isDark ? _darkCardForTema(temaColor) : Colors.white,
     );
 
     final textTheme = _textTheme(colorScheme);
@@ -47,7 +73,7 @@ class AppTheme {
         systemOverlayStyle: isDark
             ? SystemUiOverlayStyle.light.copyWith(
                 statusBarColor: Colors.transparent,
-                systemNavigationBarColor: const Color(0xFF0F0B1D),
+                systemNavigationBarColor: colorScheme.surface,
               )
             : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
         titleTextStyle: textTheme.titleLarge?.copyWith(
@@ -129,9 +155,9 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF130F22) : Colors.white,
+        backgroundColor: isDark ? colorScheme.surface : Colors.white,
         surfaceTintColor: Colors.transparent,
-        indicatorColor: const Color(0xFF7B2FF7).withValues(alpha: 0.15),
+        indicatorColor: colorScheme.primary.withValues(alpha: 0.15),
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontSize: 11,

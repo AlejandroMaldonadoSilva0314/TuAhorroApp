@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatos.dart';
 import '../data/bolsillo_repository.dart';
 import '../models/bolsillo.dart';
@@ -38,17 +38,17 @@ class _BolsillosScreenState extends State<BolsillosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.base900,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: _EncabezadoBolsillos(total: _cargando ? null : _totalBolsillos),
           ),
           if (_cargando)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   strokeWidth: 2.5,
                 ),
               ),
@@ -118,8 +118,9 @@ class _EncabezadoBolsillos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      color: AppColors.base900,
+      color: cs.surface,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.base,
         MediaQuery.of(context).padding.top + AppSpacing.sm,
@@ -136,11 +137,11 @@ class _EncabezadoBolsillos extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  gradient: AppGradients.emerald,
+                  gradient: cs.accentGradient,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.success.withValues(alpha: 0.40),
+                      color: cs.positivo.withValues(alpha: 0.40),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -150,12 +151,12 @@ class _EncabezadoBolsillos extends StatelessWidget {
                     color: Colors.white, size: 17),
               ),
               const SizedBox(width: AppSpacing.md),
-              const Text(
+              Text(
                 'Bolsillos',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: cs.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -167,11 +168,11 @@ class _EncabezadoBolsillos extends StatelessWidget {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: AppGradients.emerald,
+                gradient: cs.accentGradient,
                 borderRadius: BorderRadius.circular(AppRadius.xxl),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.success.withValues(alpha: 0.40),
+                    color: cs.positivo.withValues(alpha: 0.40),
                     blurRadius: 28,
                     offset: const Offset(0, 10),
                   ),
@@ -274,6 +275,7 @@ class _BolsilloCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final tieneObjetivo = bolsillo.objetivo > 0;
 
     return GestureDetector(
@@ -281,9 +283,9 @@ class _BolsilloCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
-          gradient: AppGradients.card,
+          gradient: cs.accentGradient,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.outlineDim),
+          border: Border.all(color: cs.cardBorder),
         ),
         child: Row(
           children: [
@@ -300,15 +302,15 @@ class _BolsilloCard extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: bolsillo.progreso,
                         strokeWidth: 3,
-                        backgroundColor: AppColors.outlineDim,
+                        backgroundColor: cs.cardBorder,
                         valueColor: AlwaysStoppedAnimation(
                           bolsillo.progreso >= 1.0
-                              ? AppColors.success
+                              ? cs.positivo
                               : bolsillo.progreso >= 0.6
                                   ? const Color(0xFF10B981)
                                   : bolsillo.progreso >= 0.3
                                       ? const Color(0xFFF59E0B)
-                                      : AppColors.primaryLight,
+                                      : cs.primaryContainer,
                         ),
                       ),
                     ),
@@ -316,7 +318,7 @@ class _BolsilloCard extends StatelessWidget {
                     width: tieneObjetivo ? 44 : 52,
                     height: tieneObjetivo ? 44 : 52,
                     decoration: BoxDecoration(
-                      color: AppColors.surface300,
+                      color: cs.surfaceContainer,
                       borderRadius: BorderRadius.circular(
                           tieneObjetivo ? AppRadius.pill : AppRadius.md),
                     ),
@@ -337,10 +339,10 @@ class _BolsilloCard extends StatelessWidget {
                 children: [
                   Text(
                     bolsillo.nombre,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: cs.onSurface,
                       letterSpacing: -0.2,
                     ),
                     maxLines: 1,
@@ -350,17 +352,17 @@ class _BolsilloCard extends StatelessWidget {
                   if (tieneObjetivo)
                     Text(
                       '${(bolsillo.progreso * 100).toStringAsFixed(0)}% · meta ${Formatos.moneda(bolsillo.objetivo)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textTertiary,
+                        color: cs.onSurfaceVariant,
                       ),
                     )
                   else
-                    const Text(
+                    Text(
                       'Sin objetivo',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textTertiary,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                 ],
@@ -372,18 +374,18 @@ class _BolsilloCard extends StatelessWidget {
               children: [
                 Text(
                   Formatos.moneda(bolsillo.saldo),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: cs.onSurface,
                     letterSpacing: -0.3,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: AppColors.textTertiary,
+                  color: cs.onSurfaceVariant,
                 ),
               ],
             ),
@@ -441,7 +443,7 @@ class _DialogGestionState extends State<_DialogGestion> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             child: const Text('Eliminar'),
           ),
         ],
@@ -455,6 +457,7 @@ class _DialogGestionState extends State<_DialogGestion> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Row(
         children: [
@@ -463,7 +466,7 @@ class _DialogGestionState extends State<_DialogGestion> {
           Expanded(
             child: Text(
               widget.bolsillo.nombre,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: cs.onSurface),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -475,9 +478,9 @@ class _DialogGestionState extends State<_DialogGestion> {
         children: [
           Text(
             'Saldo actual: ${Formatos.moneda(widget.bolsillo.saldo)}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: AppColors.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.base),
@@ -485,7 +488,7 @@ class _DialogGestionState extends State<_DialogGestion> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColors.surface200,
+              color: cs.surfaceContainerLow,
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: Row(
@@ -493,13 +496,13 @@ class _DialogGestionState extends State<_DialogGestion> {
                 _ToggleBtn(
                   label: 'Agregar',
                   activo: _agregar,
-                  color: AppColors.success,
+                  color: cs.positivo,
                   onTap: () => setState(() => _agregar = true),
                 ),
                 _ToggleBtn(
                   label: 'Retirar',
                   activo: !_agregar,
-                  color: AppColors.error,
+                  color: cs.error,
                   onTap: () => setState(() => _agregar = false),
                 ),
               ],
@@ -522,7 +525,7 @@ class _DialogGestionState extends State<_DialogGestion> {
       actions: [
         TextButton(
           onPressed: _eliminar,
-          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+          style: TextButton.styleFrom(foregroundColor: cs.error),
           child: const Text('Eliminar'),
         ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
@@ -572,6 +575,7 @@ class _DialogCrearState extends State<_DialogCrear> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AlertDialog(
       title: const Text('Nuevo bolsillo'),
       content: SingleChildScrollView(
@@ -586,12 +590,12 @@ class _DialogCrearState extends State<_DialogCrear> {
               decoration: const InputDecoration(labelText: 'Nombre', hintText: 'Ej: Vacaciones'),
             ),
             const SizedBox(height: AppSpacing.base),
-            const Text(
+            Text(
               'ÍCONO',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textTertiary,
+                color: cs.onSurfaceVariant,
                 letterSpacing: 1.2,
               ),
             ),
@@ -607,9 +611,9 @@ class _DialogCrearState extends State<_DialogCrear> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: sel ? AppColors.primary.withValues(alpha: 0.2) : AppColors.surface200,
+                      color: sel ? cs.primary.withValues(alpha: 0.2) : cs.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(AppRadius.sm),
-                      border: sel ? Border.all(color: AppColors.primary) : null,
+                      border: sel ? Border.all(color: cs.primary) : null,
                     ),
                     child: Center(child: Text(e, style: const TextStyle(fontSize: 22))),
                   ),
@@ -655,6 +659,7 @@ class _ToggleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -674,7 +679,7 @@ class _ToggleBtn extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: activo ? color : AppColors.textTertiary,
+              color: activo ? color : cs.onSurfaceVariant,
             ),
           ),
         ),
@@ -688,6 +693,7 @@ class _EstadoVacio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -698,11 +704,11 @@ class _EstadoVacio extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                gradient: AppGradients.success,
+                gradient: cs.accentGradient,
                 borderRadius: BorderRadius.circular(AppRadius.xxl),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.success.withValues(alpha: 0.4),
+                    color: cs.positivo.withValues(alpha: 0.4),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -712,21 +718,21 @@ class _EstadoVacio extends StatelessWidget {
                   color: Colors.white, size: 36),
             ),
             const SizedBox(height: AppSpacing.xl),
-            const Text(
+            Text(
               'Sin bolsillos',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: cs.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            const Text(
+            Text(
               'Crea bolsillos para organizar\ntu dinero por categorías.',
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textTertiary,
+                color: cs.onSurfaceVariant,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -745,13 +751,14 @@ class _FABPremium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        gradient: AppGradients.success,
+        gradient: cs.accentGradient,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.success.withValues(alpha: 0.5),
+            color: cs.positivo.withValues(alpha: 0.5),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),

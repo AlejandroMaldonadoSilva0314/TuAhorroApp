@@ -46,7 +46,9 @@ class _TuAhorroAppState extends State<TuAhorroApp> {
   }
 
   ThemeData _buildTheme(Brightness brightness) {
-    return brightness == Brightness.dark ? AppTheme.dark() : AppTheme.light();
+    return brightness == Brightness.dark
+        ? AppTheme.dark(_settings.temaColor)
+        : AppTheme.light(_settings.temaColor);
   }
 
   @override

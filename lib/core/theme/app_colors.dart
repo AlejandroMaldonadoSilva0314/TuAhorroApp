@@ -18,12 +18,19 @@ extension ColorSchemeTokens on ColorScheme {
 
   Color get onAccentSurface => Colors.white;
 
-  LinearGradient get heroGradient => const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF5B18D4), Color(0xFF8B35F7), Color(0xFFC084FC)],
-        stops: [0.0, 0.55, 1.0],
-      );
+  LinearGradient get heroGradient {
+    final p = primary;
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color.lerp(p, Colors.black, 0.28)!,
+        p,
+        Color.lerp(p, Colors.white, 0.30)!,
+      ],
+      stops: const [0.0, 0.55, 1.0],
+    );
+  }
 
   LinearGradient get accentGradient => LinearGradient(
         begin: Alignment.topLeft,

@@ -1,3 +1,6 @@
+import '../../../core/theme/app_design_system.dart' show TemaColor;
+export '../../../core/theme/app_design_system.dart' show TemaColor;
+
 enum TemaApp { claro, oscuro, sistema }
 
 enum FormatoFecha { diaMesAnio, mesAnioDia, anioMesDia }
@@ -14,6 +17,7 @@ class AppSettings {
   final int horaRecordatorio;
   final int minutoRecordatorio;
   final bool onboardingCompletado;
+  final TemaColor temaColor;
 
   const AppSettings({
     this.moneda = 'COP',
@@ -25,6 +29,7 @@ class AppSettings {
     this.horaRecordatorio = 20,
     this.minutoRecordatorio = 0,
     this.onboardingCompletado = false,
+    this.temaColor = TemaColor.premiumRoyal,
   });
 
   AppSettings copyWith({
@@ -37,6 +42,7 @@ class AppSettings {
     int? horaRecordatorio,
     int? minutoRecordatorio,
     bool? onboardingCompletado,
+    TemaColor? temaColor,
   }) {
     return AppSettings(
       moneda: moneda ?? this.moneda,
@@ -48,6 +54,7 @@ class AppSettings {
       horaRecordatorio: horaRecordatorio ?? this.horaRecordatorio,
       minutoRecordatorio: minutoRecordatorio ?? this.minutoRecordatorio,
       onboardingCompletado: onboardingCompletado ?? this.onboardingCompletado,
+      temaColor: temaColor ?? this.temaColor,
     );
   }
 
@@ -72,6 +79,18 @@ class AppSettings {
         return 'Oscuro';
       case TemaApp.sistema:
         return 'Sistema';
+    }
+  }
+
+  String get temaColorLabel {
+    switch (temaColor) {
+      case TemaColor.premiumRoyal: return 'Premium Royal';
+      case TemaColor.midnight:     return 'Midnight';
+      case TemaColor.aurora:       return 'Aurora';
+      case TemaColor.emerald:      return 'Emerald';
+      case TemaColor.sunset:       return 'Sunset';
+      case TemaColor.ruby:         return 'Ruby';
+      case TemaColor.lavender:     return 'Lavender';
     }
   }
 

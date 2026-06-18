@@ -204,6 +204,18 @@ class AppAnimations {
   static const Duration slow   = Duration(milliseconds: 400);
 }
 
+// ── TEMA COLOR ────────────────────────────────────────────────────────────────
+
+enum TemaColor {
+  premiumRoyal,
+  midnight,
+  aurora,
+  emerald,
+  sunset,
+  ruby,
+  lavender,
+}
+
 // ── APP TYPOGRAPHY ────────────────────────────────────────────────────────────
 
 class AppTypography {

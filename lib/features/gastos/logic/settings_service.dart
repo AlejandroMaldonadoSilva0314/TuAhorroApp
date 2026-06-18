@@ -6,6 +6,7 @@ class SettingsService {
   static const _keyMoneda = 'settings_moneda';
   static const _keyFormatoFecha = 'settings_formato_fecha';
   static const _keyTema = 'settings_tema';
+  static const _keyTemaColor = 'settings_tema_color';
   static const _keyPresupuesto = 'settings_presupuesto_semanal';
   static const _keyDiaInicio = 'settings_dia_inicio_semana';
   static const _keyNotifActivas = 'settings_notif_activas';
@@ -19,6 +20,7 @@ class SettingsService {
       moneda: prefs.getString(_keyMoneda) ?? 'COP',
       formatoFecha: FormatoFecha.values[prefs.getInt(_keyFormatoFecha) ?? 0],
       tema: TemaApp.values[prefs.getInt(_keyTema) ?? 2],
+      temaColor: TemaColor.values[prefs.getInt(_keyTemaColor) ?? 0],
       presupuestoSemanal: prefs.getDouble(_keyPresupuesto) ?? 0,
       diaInicioSemana: DiaSemana.values[prefs.getInt(_keyDiaInicio) ?? 0],
       notificacionesActivas: prefs.getBool(_keyNotifActivas) ?? false,
@@ -34,6 +36,7 @@ class SettingsService {
       prefs.setString(_keyMoneda, s.moneda),
       prefs.setInt(_keyFormatoFecha, s.formatoFecha.index),
       prefs.setInt(_keyTema, s.tema.index),
+      prefs.setInt(_keyTemaColor, s.temaColor.index),
       prefs.setDouble(_keyPresupuesto, s.presupuestoSemanal),
       prefs.setInt(_keyDiaInicio, s.diaInicioSemana.index),
       prefs.setBool(_keyNotifActivas, s.notificacionesActivas),
